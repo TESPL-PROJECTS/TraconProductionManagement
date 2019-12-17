@@ -1,0 +1,213 @@
+﻿@using ManageRoles.Repository
+@model ProductUpdateGrid_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveProductMaster", "Productuser", "", new AjaxOptions() { HttpMethod = "POST", OnBegin = "beforePage", OnSuccess = "SaveSuccess_ProductMaster", OnFailure = "OnFailure" }, new { id = "frmProductMaster", data_tablename = "tblProductGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.ProductID > 0)
+                    {@Html.Raw("Update Product") }
+                else
+                { @Html.Raw("Add Product")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        @Html.HiddenFor(d => d.Table.FinishedQty)
+                        @Html.HiddenFor(d => d.Table.BalanceQty)
+                        @Html.HiddenFor(d => d.Table.PlannedQty)
+                        @Html.HiddenFor(d => d.Table.OPM_ID)
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product ID</label>
+                            @Html.TextBoxFor(d => d.Table.ProductID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @*@Html.HiddenFor(d => d.Table.ProductID)*@
+                            <label class="control-label1">Product Name</label>
+                            @Html.DropDownListFor(d => d.Table.Productname, Model.ProductList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Process Name</label>
+                            @Html.DropDownListFor(d => d.Table.Processname, Model.ProcessList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Supplier Name</label>
+                            @Html.DropDownListFor(d => d.Table.Suppliername, Model.SupplierList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Buyer Name</label>
+                            @Html.DropDownListFor(d => d.Table.Buyername, Model.BuyerList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Buyer Order Number</label>
+                            @Html.DropDownListFor(d => d.Table.BuyerOrderNumberName, Model.BuyerOrderNumberList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Start Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate = "";
+                                    if (Model.Table != null && Model.Table.StartDate != null)
+                                    {
+                                        startdate = Model.Table.StartDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.StartDate, String.Format("{0:d}", startdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_StartDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">SPC Date </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.SPCDate != null)
+                                    {
+                                        spcdate = Model.Table.SPCDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SPCDate, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SPCDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Article Number</label>
+                            @Html.TextBoxFor(d => d.Table.ArticleNumber, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Design Number</label>
+                            @Html.TextBoxFor(d => d.Table.DesignNumber, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Size</label>
+                            @Html.TextBoxFor(d => d.Table.Size, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Colour</label>
+                            @Html.TextBoxFor(d => d.Table.Colour, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Count Construction</label>
+                            @Html.TextBoxFor(d => d.Table.CountConstruction, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Unit</label>
+                            @Html.DropDownListFor(d => d.Table.Unit, Model.UnitList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">SetNote</label>
+                            @Html.DropDownListFor(d => d.Table.SetNote, Model.SetNoteList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product Qty</label>
+                            @Html.TextBoxFor(d => d.Table.ProductQty, new { @type = "number", @class = "form-control " })
+                        </div>
+                        @*<div class="form-group col-md-4">
+            <label class="control-label1">Finished Qty</label>
+            @Html.TextBoxFor(d => d.Table.FinishedQty, new { @readonly = "readonly", @type = "number", @class = "form-control " })
+        </div>
+        <div class="form-group col-md-4">
+            <label class="control-label1">Balance Qty</label>
+            @Html.TextBoxFor(d => d.Table.BalanceQty, new { @readonly = "readonly", @type = "number", @class = "form-control " })
+        </div>
+        <div class="form-group col-md-4">
+            <label class="control-label1">Planned Qty</label>
+            @Html.TextBoxFor(d => d.Table.PlannedQty, new { @readonly = "readonly", @type = "number", @class = "form-control " })
+        </div>*@
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Remarks</label>
+                            @Html.TextBoxFor(d => d.Table.Remarks, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Story Name</label>
+                            @Html.TextBoxFor(d => d.Table.StoryName, new { @class = "form-control " })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Status</label>
+                            @Html.TextBoxFor(d => d.Table.Status, new { @class = "form-control " })
+                        </div>
+                        @*<div class="form-group col-md-4">
+            <label class="control-label1">IsActive</label>
+            <div class="col-md-8">
+                @{Model.Table.IsActive = Model.Table.IsActive.HasValue ? Model.Table.IsActive : false; }
+                @Html.CheckBoxFor(d => d.Table.IsActive.Value, new { Name = "Table.IsActive" })
+            </div>
+        </div>*@
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">SKU Start Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var skuStartdate = "";
+                                    if (Model.Table != null && Model.Table.SKUStartDate != null)
+                                    {
+                                        skuStartdate = Model.Table.SKUStartDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SKUStartDate, String.Format("{0:d}", skuStartdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SKUStartDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">SKU completed Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var skuEnddate = "";
+                                    if (Model.Table != null && Model.Table.SKUEndDate != null)
+                                    {
+                                        skuEnddate = Model.Table.SKUEndDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SKUEndDate, String.Format("{0:d}", skuEnddate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SKUEndDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+                                    }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @*<script type="text/javascript">
+            $(function () {
+                $("#dvTitle").html("Product Detail");
+            });
+        </script>*@
+}

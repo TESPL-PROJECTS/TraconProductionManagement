@@ -1,0 +1,355 @@
+﻿@model ManageRoles.Repository.ProductGantt_Model
+@{
+    ViewBag.Title = "Index";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+<link href="~/Content/jquery.ganttView.css" rel="stylesheet" />
+@*<div class="row header-title">
+    <div class="title">Gantt Chart</div>
+    <hr class="hr-tp-0" />
+</div>
+<div class="row pd-bt-10" style="margin-bottom:10px">
+    <div class="col-md-6">
+        <label class="control-label1">Buyer Order Number</label>
+        @Html.DropDownList("BuyerOrderNumberName", (SelectList)ViewBag.LstBuyerOrderNumber, "[ALL]", new { @class = "form-control", onchange = "SetGantt(this)" })
+    </div>
+</div>
+<div id="gantt"></div>
+<script type="text/x-kendo-template" id="myTemplate">
+    <div>
+        <div>Order : #: task.buyerOrderNumberName #</div>
+        <div>
+            <p>Days #: task.nodays #</p>
+            <p>#: task.processname # > #: task.title #</p>
+        </div>
+    </div>
+</script>*@
+
+
+<div class="row pd-bt-10" style="margin-bottom:10px">
+    <div class="col-md-6">
+        <label class="control-label1">Buyer Order Number</label>
+        @Html.DropDownList("Buyername", (SelectList)ViewBag.LstBuyername, "[ALL]", new { @class = "form-control", onchange = "SetGantt1(this)" })
+    </div>
+</div>
+<div id="gantt1"></div>
+<script type="text/x-kendo-template" id="myTemplate1">
+    <div>
+        <div style="background-color:lightgreen;">For : #: task.title #</div>
+        <div>
+            # if (task.nodays != '0' ) { #
+            <p>Actual Planned Days #: task.nodays #</p>
+            #} #
+             <p>Start Date : #= kendo.toString(task.start, "dd/MM/yyyy") #</p>
+            <p>SPC Date : #= kendo.toString(task.end, "dd/MM/yyyy") #</p>
+            <p>%Done : #= kendo.toString(task.Done,"0.00") #</p>
+            <p>SKU Start on : #= task.SKUStart == null ? "" :kendo.toString(task.SKUStart, "dd/MM/yyyy") #</p>
+            <p>SKU Completed on : #= task.SKUEnd == null ? "" :kendo.toString(task.SKUEnd, "dd/MM/yyyy") #</p>
+            <p>Delayed Days : #= task.DelayedDays #</p>
+        </div>
+    </div>
+</script>
+
+<link href="~/Content/Kendo/kendo.default-v2.min.css" rel="stylesheet" />
+<script src="~/Content/Kendo/kendo.all.min.js"></script>
+@*https://github.com/thegrubbsian/jquery.ganttView*@
+@section scripts {
+    <script>
+        @*var dataSource = new kendo.data.GanttDataSource({
+            transport: {
+                read: function (options) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SetGanttChart", "Chart")",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        success: function (res) {
+                            options.success(res.data);
+                        },
+                        error: function (result) {
+                            alert("Error :" + JSON.stringify(result));
+                        }
+                    });
+                }
+            },
+            schema: {
+                model: {
+                    id: "id",
+                    fields: {
+                        id: { from: "ID", type: "number" },
+                        orderId: { from: "OrderID", type: "number" },
+                        parentId: { from: "ParentID", type: "number"},
+                        start: { from: "Start", type: "date" },
+                        end: { from: "End", type: "date" },
+                        title: { from: "Title", defaultValue: "", type: "string" },
+                        percentComplete: { from: "PercentComplete", type: "number" },
+                        summary: { from: "Summary" },
+                        expanded: { from: "Expanded" },
+                        nodays: { from: "NoDays", type: "number" },
+                        buyerOrderNumberName: { from: "BuyerOrderNumberName", type: "string" },
+                        processname: { from: "Processname", type: "string" },
+                        DelayedDays: { from: "DelayedDays", type: "number" },
+                        Done: { from: "Done", type: "number" }    
+                    }
+                }
+            }
+        });*@
+
+        var dataSource1 = new kendo.data.GanttDataSource({
+            transport: {
+                read: function (options) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SetGanttChart1", "Chart")",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        success: function (res) {
+                            options.success(res.data);
+                        },
+                        error: function (result) {
+                            alert("Error :" + JSON.stringify(result));
+                        }
+                    });
+                }
+            },
+            schema: {
+                model: {
+                    id: "id",
+                    fields: {
+                        id: { from: "ID", type: "number" },
+                        orderId: { from: "OrderID", type: "number" },
+                        parentId: { from: "ParentID", type: "number" },
+                        childId: { from: "ChildId", type: "number" },
+                        start: { from: "Start", type: "date" },
+                        end: { from: "End", type: "date" },
+                        title: { from: "Title", defaultValue: "", type: "string" },
+                        percentComplete: { from: "PercentComplete", type: "number" },
+                        summary: { from: "Summary" },
+                        expanded: { from: "Expanded" },
+                        nodays: { from: "NoDays", type: "number" },
+                        DelayedDays: { from: "DelayedDays", type: "number" },
+                        Done: { from: "Done", type: "number" },
+                        SKUStart: { from: "SKUStart", type: "date" },
+                        SKUEnd: { from: "SKUEnd", type: "date" },
+                    }
+                }
+            }
+        });
+
+        $(document).ready(function () {
+            //$("#gantt").kendoGantt({
+            //    tooltip: {
+            //        visible: true,
+            //        template: kendo.template($("#myTemplate").html())
+            //    },
+            //    dataSource: dataSource,
+            //    views: [
+            //        { type: "week", selected: true },
+            //        "month"
+            //    ],
+            //    columns: [
+            //        { field: "id", title: "ID", width: 30 },
+            //        { field: "buyerOrderNumberName", title: "BuyerOrderNumberName", editable: true, sortable: false },
+            //        { field: "processname", title: "Processname", editable: true, sortable: false },
+            //        { field: "title", title: "Productname", editable: true, sortable: false },
+            //        { field: "start", title: "Start Date", format: "{0:MM/dd/yyyy}", width: 100, editable: false, sortable: false },
+            //        { field: "end", title: "SPC Date", format: "{0:MM/dd/yyyy}", width: 100, editable: false, sortable: false },
+            //        { field: "Done", title: "%Done", width: 100, editable: false, sortable: false },
+            //        { field: "DelayedDays", title: "Delayed Days", width: 100, editable: false, sortable: false }
+            //    ],
+            //    editable: false,
+            //    height: 700,
+            //    showWorkHours: false,
+            //    showWorkDays: false,
+            //    snap: false,
+            //    dataBound: function () {
+            //        var gantt = this;
+
+            //        gantt.element.find(".k-task").each(function (e) {
+            //            var dataItem = gantt.dataSource.getByUid($(this).attr("data-uid"));
+            //            $(this).find(".k-task-template").html(dataItem.title + " - No of Days : " + dataItem.nodays);
+            //            // colorize task 
+            //            if (dataItem.percentComplete >= 1) {
+            //                this.style.backgroundColor = "yellowgreen";
+            //                $(this).find(".k-task-complete").css("background-color", "yellowgreen");
+            //            } else if (dataItem.percentComplete < .5) {
+            //                this.style.backgroundColor = "#111";
+            //            } else {
+            //                this.style.backgroundColor = "#222";
+            //            }
+            //        });
+            //    }
+            //});
+
+            $("#gantt1").kendoGantt({
+                tooltip: {
+                    visible: true,
+                    template: kendo.template($("#myTemplate1").html())
+                },
+                dataSource: dataSource1,
+                views: [
+                    { type: "week", selected: true },
+                    "month"
+                ],
+                columns: [
+                    { field: "id", title: "ID", width: 60 },
+                    { field: "title", title: "Buyer Order name", editable: true, sortable: false },
+                    { field: "start", title: "Start Date", format: "{0:dd/MM/yyyy}", width: 100, editable: false, sortable: false },
+                    { field: "end", title: "SPC Date", format: "{0:dd/MM/yyyy}", width: 100, editable: false, sortable: true },
+                    { field: "Done", title: "%Done", width: 100, editable: false, sortable: false },
+                    { field: "DelayedDays", title: "Delayed Days", width: 100, editable: false, sortable: false }
+                   
+                    
+                ],
+                editable: false,
+                height: 800,
+                showWorkHours: false,
+                showWorkDays: false,
+                snap: false,
+                dataBound: function () {
+                    var gantt = this;
+                    gantt.element.find(".k-task").each(function (e) {
+                        var dataItem = gantt.dataSource.getByUid($(this).attr("data-uid"));
+                        $(this).find(".k-task-template").html(dataItem.title + " - No of Days : " + dataItem.nodays);                        
+                        // colorize task 
+                        console.log($(this));
+                        //$(this).find(".k-task-summary").attr('style', 'background-color: red');
+                        if (dataItem.percentComplete >= 1) {
+                            this.style.backgroundColor = "yellowgreen";
+                            //$(this).find(".k-task-complete").css("background-color", "yellowgreen");
+                            //$(this).find(".k-task-summary-complete").css("background-color", "yellowgreen");
+                        } else if (dataItem.percentComplete < .5) {
+                            this.style.backgroundColor = "#111";
+                        } else {
+                            this.style.backgroundColor = "#222";
+                        }
+                    });
+                    gantt.element.find(".k-task.k-task-summary").each(function (e) {
+                        var dataItem = gantt.dataSource.getByUid($(this).attr("data-uid"));
+                        // colorize task 
+                        console.log("dataItem.DelayedDays : " + dataItem.DelayedDays);
+                        if (dataItem.DelayedDays > 0) {
+                            console.log($(this));
+                            $(this).css({ 'background-color': 'red' });
+                            $(this).find(".k-task-summary-complete").css("color", "red");
+                        } else {
+                            $(this).css({ 'background-color': 'green' });
+                            $(this).find(".k-task-summary-complete").css("color", "green");
+                        }                        
+                        //console.log($(this));                        
+                    });
+                }
+            });
+        });
+
+        function SetGantt1($this) {
+            var val = $($this).val();
+            var gantt = $("#gantt1").data("kendoGantt");
+            var dataSource2 = new kendo.data.GanttDataSource({
+                transport: {
+                    read: function (options) {
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("SetGanttChart1", "Chart")",
+                            data: "{'BON' : '" + val+"'}",
+                            contentType: "application/json; charset=utf-8",
+                            dataType: 'json',
+                            success: function (res) {
+                                options.success(res.data);
+                            },
+                            error: function (result) {
+                                alert("Error :" + JSON.stringify(result));
+                            }
+                        });
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "id",
+                        fields: {
+                            id: { from: "ID", type: "number" },
+                            orderId: { from: "OrderID", type: "number" },
+                            parentId: { from: "ParentID", type: "number" },
+                            childId: { from: "ChildId", type: "number" },
+                            start: { from: "Start", type: "date" },
+                            end: { from: "End", type: "date" },
+                            title: { from: "Title", defaultValue: "", type: "string" },
+                            percentComplete: { from: "PercentComplete", type: "number" },
+                            summary: { from: "Summary" },
+                            expanded: { from: "Expanded" },
+                            nodays: { from: "NoDays", type: "number" },
+                            DelayedDays: { from: "DelayedDays", type: "number" },
+                            Done: { from: "Done", type: "number" },
+                            SKUStart: { from: "SKUStart", type: "date" },
+                            SKUEnd: { from: "SKUEnd", type: "date" }
+                        }
+                    }
+                }
+            });
+            gantt.setDataSource(dataSource2);
+            gantt.dataSource.read();
+            //gantt.refresh();
+        }
+
+        @*function SetGantt($this) {
+            var val = $($this).val();
+            var gantt = $("#gantt").data("kendoGantt");
+            var dataSource3 = new kendo.data.GanttDataSource({
+                transport: {
+                    read: function (options) {
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Action("SetGanttChart", "Chart")",
+                            contentType: "application/json; charset=utf-8",
+                            data: "{'BON' : '" + val + "'}",
+                            dataType: 'json',
+                            success: function (res) {
+                                options.success(res.data);
+                            },
+                            error: function (result) {
+                                alert("Error :" + JSON.stringify(result));
+                            }
+                        });
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "id",
+                        fields: {
+                            id: { from: "ID", type: "number" },
+                            orderId: { from: "OrderID", type: "number" },
+                            parentId: { from: "ParentID", type: "number"},
+                            start: { from: "Start", type: "date" },
+                            end: { from: "End", type: "date" },
+                            title: { from: "Title", defaultValue: "", type: "string" },
+                            percentComplete: { from: "PercentComplete", type: "number" },
+                            summary: { from: "Summary" },
+                            expanded: { from: "Expanded" },
+                            nodays: { from: "NoDays", type: "number" },
+                            buyerOrderNumberName: { from: "BuyerOrderNumberName", type: "string" },
+                            processname: { from: "Processname", type: "string" },
+                            DelayedDays: { from: "DelayedDays", type: "number" },
+                            Done: { from: "Done", type: "number" }    
+                        }
+                    }
+                }
+            });
+            gantt.setDataSource(dataSource3);
+            gantt.dataSource.read();
+            //gantt.refresh();
+        }*@
+    </script>
+}
+
+

@@ -1,0 +1,164 @@
+﻿@using ManageRoles.Repository
+@model QAInspection_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveQAInspection", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "SaveSuccess_QAInspection", OnFailure = "OnFailureQAInspection" }, new { id = "frmQAInspection", data_tablename = "tblQAInspectionGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.QAIns_ID > 0)
+                    {@Html.Raw("Update QAInspection") }
+                else
+                { @Html.Raw("Add QAInspection")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product ID</label>
+                            @Html.HiddenFor(d => d.Table.OPM_ID)
+                            @Html.TextBoxFor(d => d.Table.QAIns_ID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Type of Inspection</label>
+                            @Html.DropDownListFor(d => d.Table.TypeOfInspection, Model.InspectionTypeList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Request Date1 </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate = "";
+                                    if (Model.Table != null && Model.Table.RequestDate1 != null)
+                                    {
+                                        startdate = Model.Table.RequestDate1.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.RequestDate1, String.Format("{0:d}", startdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_RequestDate1" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Inspection Date1 </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.InspectionDate1 != null)
+                                    {
+                                        spcdate = Model.Table.InspectionDate1.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.InspectionDate1, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_InspectionDate1" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div><div class="form-group col-md-4">
+                            <label class="control-label1">Request Date2 </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate1 = "";
+                                    if (Model.Table != null && Model.Table.RequestDate2 != null)
+                                    {
+                                        startdate1 = Model.Table.RequestDate2.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.RequestDate2, String.Format("{0:d}", startdate1), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_RequestDate2" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Inspection Date2 </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate1 = "";
+                                    if (Model.Table != null && Model.Table.InspectionDate2 != null)
+                                    {
+                                        spcdate1 = Model.Table.InspectionDate2.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.InspectionDate2, String.Format("{0:d}", spcdate1), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_InspectionDate2" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Request Date3 </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate2 = "";
+                                    if (Model.Table != null && Model.Table.RequestDate3 != null)
+                                    {
+                                        startdate2 = Model.Table.RequestDate3.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.RequestDate3, String.Format("{0:d}", startdate2), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_RequestDate3" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Inspection Date3 </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate2 = "";
+                                    if (Model.Table != null && Model.Table.InspectionDate3 != null)
+                                    {
+                                        spcdate2 = Model.Table.InspectionDate3.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.InspectionDate3, String.Format("{0:d}", spcdate2), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_InspectionDate3" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+
+
+
+

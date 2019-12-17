@@ -1,0 +1,81 @@
+﻿@using ManageRoles.Repository
+@model Target_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.Target_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblTargetGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|TargetFilterSearch|TargetList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblTargetGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">Target_ID</th>
+                <th class="action">Warp Issuance</th>
+                <th class="action">Weaving Completion</th>
+                <th class="action">SKU sheet Target</th>
+                <th class="action">Target to order accessories</th>
+                <th class="action">Design Approval</th>
+                <th class="action">Finishing Completion</th>
+                <th class="action">Target to receipt accessories</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.TargetList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.TargetList)
+                {
+                    <tr class="Target-row-@item.Target_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditTarget(@item.Target_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteTarget(@item.Target_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.Target_ID</td>
+                        <td>@(item.WarpIssuance != null ? Convert.ToDateTime(item.WarpIssuance).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.WeavingCompletion != null ? Convert.ToDateTime(item.WeavingCompletion).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.SKUSheet != null ? Convert.ToDateTime(item.SKUSheet).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.OrderAccessories != null ? Convert.ToDateTime(item.OrderAccessories).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.DesignApproval != null ? Convert.ToDateTime(item.DesignApproval).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.FinishingCompletion != null ? Convert.ToDateTime(item.FinishingCompletion).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.ReceiptAccessories != null ? Convert.ToDateTime(item.ReceiptAccessories).ToString("dd-MMM-yy") : "")</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="9">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "TargetFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "TargetList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblTargetGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>
+

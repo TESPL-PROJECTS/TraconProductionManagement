@@ -1,0 +1,62 @@
+﻿@using ManageRoles.Repository
+@model List<ManageRoles.Models.VW_DSProductUpdateGrid>
+@{
+    Layout = null;
+}
+<div class="table-responsive" style="width:1600px">
+    <table id="tblQPL" class="main-grid table table-striped table-bordered table-hover1 tableFixHead">
+        <thead>
+            <tr class="header-title">
+                <th class="action">Product ID</th>
+                <th class="action">Buyer Name </th>
+                <th class="action">Buyer Order Number</th>
+                <th class="action">Process Name</th>
+                <th class="action">Product Name</th>
+                <th class="action">SPC Date</th>
+                <th class="action">Today Date</th>
+                <th class="action">Finished Days</th>
+                <th class="action">Product Qty</th>
+                <th class="action">Finished Qty</th>
+                <th class="action">Unit</th>
+                <th class="action">Remaining Days</th>
+                <th class="action">Done %</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td>@item.ProductID</td>
+                    <td>@item.Buyername</td>
+                    <td>@item.BuyerOrderNumberName</td>
+                    <td>@item.Processname</td>
+                    <td>@item.Productname</td>
+                    <td>@(item.SPCDate != null ? Convert.ToDateTime(item.SPCDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.TodayDate != null ? Convert.ToDateTime(item.TodayDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@item.FinishedDays</td>
+                    <td>@item.ProductQty</td>
+                    <td>@item.FinishedQty</td>
+                    <td>@item.Unit</td>
+                    <td>@item.RemainingDays</td>
+                    <td>@Html.Raw(item.Done > 0 ? item.Done.ToString("#.##") : "0.00")</td>
+                </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+    </table>
+</div>
+
+
+

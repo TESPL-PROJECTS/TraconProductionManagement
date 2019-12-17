@@ -1,0 +1,80 @@
+﻿@using ManageRoles.Repository
+@model PlannerUpdateGrid
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SavePlannedMaster", "Product", "", new AjaxOptions() { HttpMethod = "POST", OnBegin = "beforePage", OnSuccess = "SaveSuccess_PlannedQtyMaster", OnFailure = "OnFailure" }, new { id = "frmPlannedQtyMaster", data_tablename = "tblProductGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.PlannerID > 0)
+                    {@Html.Raw("Update Planned Qty") }
+                else
+                { @Html.Raw("Add Planned Qty")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        @Html.HiddenFor(d => d.PlannerID)
+                        @Html.HiddenFor(d => d.ProductID)
+                        @Html.HiddenFor(d => d.FinishedQty)
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Planning Date </label>
+                            <div class="input-group">
+                                @{
+                                    var planningdate = "";
+                                    if (Model != null && Model.PlanningDate != null)
+                                    {
+                                        planningdate = Model.PlanningDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.PlanningDate, String.Format("{0:d}", planningdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_PlanningDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Planned Qty</label>
+                            @Html.TextBoxFor(d => d.PlannedQty, new { @type = "number", @class = "form-control " })
+                        </div>
+                        @*<div class="form-group col-md-4">
+                                <label class="control-label1">Finished Qty</label>
+                                @Html.TextBoxFor(d => d.FinishedQty, new { @readonly = "readonly", @type = "number", @class = "form-control " })
+                            </div>*@
+                        <div class="form-group col-md-12">
+                            <label class="control-label1">Remarks</label>
+                            @Html.TextBoxFor(d => d.Remarks, new { @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_plannedqtymodel"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

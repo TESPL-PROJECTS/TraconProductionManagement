@@ -1,0 +1,108 @@
+﻿@using ManageRoles.Repository
+@model QAInfo_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveQAInfo", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "SaveSuccess_QAInfo", OnFailure = "OnFailureQAInfo" }, new { id = "frmQAInfo", data_tablename = "tblQAInfoGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.QAInfo_ID > 0)
+                    {@Html.Raw("Update QAInfo") }
+                else
+                { @Html.Raw("Add QAInfo")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product ID</label>
+                            @Html.HiddenFor(d => d.Table.OPM_ID)
+                            @Html.TextBoxFor(d => d.Table.QAInfo_ID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">External Agency inspection </label>
+                            @{
+                                bool isext = false;
+                                if (Model.Table != null && Model.Table.ExternalAgencyInspection != null)
+                                {
+                                    isext = Convert.ToBoolean(Model.Table.ExternalAgencyInspection);
+                                }
+                            }
+                            <select id="Table_ExternalAgencyInspection" name="Table.ExternalAgencyInspection" class="form-control">
+                                <option value="true" @(isext ? "selected=selected" : "")>Yes</option>
+                                <option value="false" @(!isext ? "selected=selected" : "")>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Target to send request before # days of Inspection </label>
+                            @Html.TextBoxFor(m => m.Table.SendRequestBeforeDay, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Target date to send sample for approval </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.SendSampleForApproval != null)
+                                    {
+                                        spcdate = Model.Table.SendSampleForApproval.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SendSampleForApproval, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SendSampleForApproval" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Target date to send Sealer sample </label>
+                            <div class="input-group">
+                                @{
+                                    var dt = "";
+                                    if (Model.Table != null && Model.Table.SendSealerSample != null)
+                                    {
+                                        dt = Model.Table.SendSealerSample.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SendSealerSample, String.Format("{0:d}", dt), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SendSealerSample" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+                                    }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+
+
+
+

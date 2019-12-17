@@ -1,0 +1,59 @@
+﻿@model ManageRoles.Repository.ProductGantt_Model
+@{
+    ViewBag.Title = "Index";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+<link href="~/Content/jquery.ganttView.css" rel="stylesheet" />
+<div class="row header-title">
+    <div class="title">Chart</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10" style="margin-bottom:10px">
+    @using (Html.BeginForm("ResetGantt", "Chart", FormMethod.Post))
+    {
+        <div class="form-horizontal1">
+            <div class="form-body">
+                <div class="form-group col-md-4">
+                    <label class="control-label1">Buyer Order Number</label>
+                    @Html.DropDownListFor(d => d.BuyerOrderNumberName, Model.BuyerOrderNumberList, "[ALL]", new { @class = "form-control" })
+                </div>
+                <div class="form-group col-md-4">
+                    <label class="control-label1">Process Name</label>
+                    @Html.DropDownListFor(d => d.ProcessName, Model.ProcessList, "[ALL]", new { @class = "form-control" })
+                </div>
+                <div class="form-group col-md-4">
+                    <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row" id="ganttChart">
+</div>
+<div id="gantt"></div>
+<script src="~/Scripts/date.js"></script>
+<script src="~/Scripts/jquery.ganttView.js"></script>
+@*https://github.com/thegrubbsian/jquery.ganttView*@
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $("#ganttChart").ganttView({
+                data: @Html.Raw(Model.Json),
+				slideWidth: 800
+			});
+        });
+    </script>
+}

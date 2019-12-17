@@ -1,0 +1,162 @@
+﻿@using ManageRoles.Repository
+@model OPM_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveOPM", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnBegin = "beforePage", OnSuccess = "SaveSuccess_OPM", OnFailure = "OnFailure" }, new { id = "frmOPM", data_tablename = "tblOPMGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.OPM_ID > 0)
+                    {@Html.Raw("Update OPM") }
+                else
+                { @Html.Raw("Add OPM")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product ID</label>
+                            @Html.TextBoxFor(d => d.Table.OPM_ID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @*@Html.HiddenFor(d => d.Table.ProductID)*@
+                            <label class="control-label1">Buyer Name</label>
+                            @Html.DropDownListFor(d => d.Table.BuyerName, Model.BuyerNameList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @*@Html.HiddenFor(d => d.Table.ProductID)*@
+                            <label class="control-label1">Buyer Reference Name</label>
+                            @*@Html.DropDownListFor(d => d.Table.BuyerReferenceName, Model.BuyerReferenceNameList, "[None]", new { @class = "form-control" })*@
+                            <div class="input-group">
+                                @Html.ListBoxFor(d => d.BuyerReferenceName, Model.BuyerReferenceNameList as MultiSelectList, new { @class = "form-control" })
+                                @Html.HiddenFor(d => d.Table.BuyerReferenceName)
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Story Name</label>
+                            @Html.DropDownListFor(d => d.Table.BuyerStoryName, Model.BuyerStoryNameList, "[None]", new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">OID Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate = "";
+                                    if (Model.Table != null && Model.Table.OID != null)
+                                    {
+                                        startdate = Model.Table.OID.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.OID, String.Format("{0:d}", startdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_OID" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">StartupLetterIssued Date </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.StartupLetterIssued != null)
+                                    {
+                                        spcdate = Model.Table.StartupLetterIssued.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.StartupLetterIssued, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_StartupLetterIssued" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">KrrMeetingHeldOn </label>
+                            <div class="input-group">
+                                @{
+                                    var dt = "";
+                                    if (Model.Table != null && Model.Table.KrrMeetingHeldOn != null)
+                                    {
+                                        dt = Model.Table.KrrMeetingHeldOn.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.KrrMeetingHeldOn, String.Format("{0:d}", dt), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_KrrMeetingHeldOn" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">PackingList Date </label>
+                            <div class="input-group">
+                                @{
+                                    var dt1 = "";
+                                    if (Model.Table != null && Model.Table.PackingList != null)
+                                    {
+                                        dt1 = Model.Table.PackingList.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.PackingList, String.Format("{0:d}", dt1), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_PackingList" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">KarurDespatch Date </label>
+                            <div class="input-group">
+                                @{
+                                    var dt2 = "";
+                                    if (Model.Table != null && Model.Table.KarurDespatch != null)
+                                    {
+                                        dt2 = Model.Table.KarurDespatch.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.KarurDespatch, String.Format("{0:d}", dt2), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_KarurDespatch" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Participants</label>
+                            <div class="input-group">
+                                @Html.ListBoxFor(d => d.Participant, Model.ParticipantList as MultiSelectList, new { @class = "form-control" })
+                                @Html.HiddenFor(d => d.Table.Participants)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+                                    }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+

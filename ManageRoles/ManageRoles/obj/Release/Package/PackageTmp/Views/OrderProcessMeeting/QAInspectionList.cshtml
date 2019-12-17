@@ -1,0 +1,80 @@
+﻿@using ManageRoles.Repository
+@model QAInspection_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.QAIns_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblQAInspectionGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|QAInspectionFilterSearch|QAInspectionList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblQAInspectionGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">QAIns_ID</th>
+                <th class="action">Type of Inspection</th>
+                <th class="action">RequestDate1</th>
+                <th class="action">InspectionDate1</th>
+                <th class="action">RequestDate2</th>
+                <th class="action">InspectionDate2</th>
+                <th class="action">RequestDate3</th>
+                <th class="action">InspectionDate3</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.QAInspectionList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.QAInspectionList)
+                {
+                    <tr class="QAInspection-row-@item.QAIns_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditQAInspection(@item.QAIns_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteQAInspection(@item.QAIns_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.QAIns_ID</td>
+                        <td>@item.TypeOfInspection</td>
+                        <td>@(item.RequestDate1 != null ? Convert.ToDateTime(item.RequestDate1).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.InspectionDate1 != null ? Convert.ToDateTime(item.InspectionDate1).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.RequestDate2 != null ? Convert.ToDateTime(item.RequestDate2).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.InspectionDate2 != null ? Convert.ToDateTime(item.InspectionDate2).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.RequestDate3 != null ? Convert.ToDateTime(item.RequestDate3).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.InspectionDate3 != null ? Convert.ToDateTime(item.InspectionDate3).ToString("dd-MMM-yy") : "")</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="9">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "QAInspectionFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "QAInspectionList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblQAInspectionGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

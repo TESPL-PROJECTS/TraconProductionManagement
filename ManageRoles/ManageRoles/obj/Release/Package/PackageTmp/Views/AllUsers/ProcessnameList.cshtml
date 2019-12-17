@@ -1,0 +1,100 @@
+﻿@using ManageRoles.Repository
+@model Processname_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int i = 0;
+    int count = Model.Filters.Count() + 2;
+    int id = Model.Table == null ? 0 : Model.Table.ProcID;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblProcessnameGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "AllUsers|ProcessnameFilterSearch|ProcessnameList|tblProcessnameGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                @foreach (var filter in Model.Filters)
+                {
+                    if (filter.ColumnName.ToLower() != "procid")
+                    {
+
+                        <th class="@filter.ColumnName">
+                            @Html.Sorter(filter.ColumnName, filter.DisplayText, Model.dynamicListMetaData.TotalItemCount, "ProcessnameFilterSearch", "AllUsers", new AjaxOptions() { UpdateTargetId = "ProcessnameList", OnSuccess = "bindGridEvent('tblProcessnameGrid')", OnBegin = "beforePage" }, new { page = Model.dynamicListMetaData.PageNumber, sortOrder = filter.ColumnName == Model.fieldName ? Model.sortOrder : "" })
+                        </th>
+                    }
+                    i++;
+                }
+            </tr>
+        </thead>
+        @if (Model != null && Model.dynamicList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.dynamicList)
+                {
+                    <tr class="prod-row-@item.ProcID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditProcessname(@item.ProcID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteProcessname(@item.ProcID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        @foreach (var column in item)
+                        {
+                            string columnName = column.Key;
+                            string columnValue = column.Value == null ? string.Empty : Convert.ToString(column.Value);
+                            if (columnName.ToLower() != "procid" && columnName.ToLower() != "userid")
+                            {
+                                <td class="@columnName">
+                                    @Html.Raw(columnValue)
+                                </td>
+                            }
+                        }
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="@count">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.dynamicList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="@count">
+                        @{
+                            MVCPagerModel objMVCPagerModel = new MVCPagerModel();
+                            objMVCPagerModel.ActionName = "ProcessnameFilterSearch";
+                            objMVCPagerModel.ControllerName = "AllUsers";
+                            objMVCPagerModel.UpdateTargetId = "ProcessnameList";
+                            objMVCPagerModel.TableUpdate = "tblProcessnameGrid";
+                            objMVCPagerModel.DynamicList = Model.dynamicList;
+                            objMVCPagerModel.DynamicListMetaData = Model.dynamicListMetaData;
+                            objMVCPagerModel.sortOrder = Model.sortOrder;
+                            objMVCPagerModel.fieldName = Model.fieldName;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                        }
+                        @Html.Partial("_MVCPager", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>
+<script>
+    if (typeof SortSetting == 'function') {
+        SortSetting('@(Model.sortOrder == null ? "" : Model.sortOrder)', '@(Model.fieldName == null ? "" : Model.fieldName)');
+    }
+</script>
+
+
+
+
+
+

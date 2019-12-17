@@ -1,0 +1,461 @@
+﻿@using ManageRoles.Repository
+@using ManageRoles.Helpers
+@model ProductUpdateGrid_Model
+@{
+    ViewBag.Title = "ProductGrid";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+@Html.Partial("_FilterMenu")
+
+<div class="row header-title">
+    <div class="title">Weekly Planner</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-6 pd-0 btnmrg">
+        @*<button id="btnAdd" type="button" onclick="AddEditProductMaster();" class="btnCRUD btn btn-sm btn-primary">
+            <i class="glyphicon glyphicon-plus"></i> Add Product
+        </button>*@
+    </div>
+    <div class="col-md-6 font-14">
+        <div id="lblmsg"></div>
+    </div>
+</div>
+
+<div class="row" id="ProductGridList">
+    @Html.Partial("ProductGridList", Model)
+</div>
+
+@* Add model after main div where model used in main div for CRUD Operation model for getting tablelist id *@
+<div id="dvProductMasterModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvPlannedQtyModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvFinishedQtyModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+
+@section scripts{
+    <link href="~/Content/CommonGrid.css" rel="stylesheet" />
+    <link href="~/Content/animate.min.css" rel="stylesheet" />
+    <link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.datetimepicker.full.js"></script>
+
+    <script src="~/Scripts/Common.js"></script>
+    <script type="text/javascript">
+        rootUrl = "@Url.Content("~/")";
+        var ControllerName = "Productuser"; var ActionName = "ProductGridFilterSearch"; var tableList = "ProductGridList"; var tableName = "tblProductGrid";//For Grid
+        var dvModel = "dvModel"; var frnName = "frmProductMaster";
+
+        //Add/Edit Product Master
+        function AddEditProductMaster(ProductID = 0) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditProductMaster", "Productuser")",
+                data: JSON.stringify({ "ProductID": ProductID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvProductMasterModel').html(data);
+                    $('#dvProductMasterModel').modal('show');
+
+                    formValidation_ProductMaster();//Validation
+                    SetDatepicker_ProductMaster();//Set Datepicker
+                    $(".close_product_model").click(function () {
+                        $('#dvProductMasterModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_ProductMaster() {
+            $("#frmProductMaster").validate({
+                rules: {
+                    "Table.Productname": "required",
+                    "Table.Processname": "required",
+                    "Table.Suppliername": "required",
+                    "Table.BuyerOrderNumberName": "required",
+                    "Table.StartDate": "required",
+                    "Table.SPCDate": "required",
+                    "Table.ArticleNumber": "required",
+                    "Table.DesignNumber": "required",
+                    "Table.Size": "required",
+                    "Table.Colour": "required",
+                    "Table.CountConstruction": "required",
+                    "Table.Unit": "required",
+                    "Table.SetNote": "required",
+                    "Table.ProductQty": { number: true }//, min: 2, max: 50 }
+                },
+                messages: {
+                    "Table.Productname": "",
+                    "Table.Processname": "",
+                    "Table.Suppliername": "",
+                    "Table.BuyerOrderNumberName": "",
+                    "Table.StartDate": "",
+                    "Table.SPCDate": "",
+                    "Table.ArticleNumber": "",
+                    "Table.DesignNumber": "",
+                    "Table.Size": "",
+                    "Table.Colour": "",
+                    "Table.CountConstruction": "",
+                    "Table.Unit": "",
+                    "Table.SetNote": "",
+                    "Table.ProductQty": { number: "" }//, min: 2, max: 50 }
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_ProductMaster(id) {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_ProductMaster(tableHtml) {
+            $("#" + tableList).html(tableHtml);
+            $('#dvProductMasterModel').modal('hide');
+            bindGridEvent(tableName); //initialize grid functions
+
+            alert("Product successfuly saved.");
+        }
+        function OnFailure(msg) {
+            if (msg.statusText == "exists") {alert("Product Name already exists.");}
+        }
+        function DeleteProductMaster(ProductID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteProductMaster", "Productuser")",
+                    data: JSON.stringify({ "ProductID": ProductID, fieldName: setFieldName, sortOrder: setSortorder, 'StaticPageSize': 10 }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableList).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+        //Add/Edit Planned Qty
+        function AddEditPlannedQty(PlannerID = 0, ProductID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditPlannedQty", "Productuser")",
+                data: JSON.stringify({ "PlannerID": PlannerID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvPlannedQtyModel').html(data);
+                    $('#dvPlannedQtyModel').modal('show');
+                    if (PlannerID == 0) {
+                        $("#frmPlannedQtyMaster input[name=ProductID]").val(ProductID);
+                    }
+
+                    formValidation_PlannedQtyMaster();//Validation
+                    SetDatepicker_PlannedQtyMaster();//Set Datepicker
+                    $(".close_plannedqtymodel").click(function () {
+                        $('#dvPlannedQtyModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_PlannedQtyMaster() {
+            $("#frmPlannedQtyMaster").validate({
+                rules: {
+                    "PlanningDate": "required",
+                    "PlannedQty": { number: true },//, min: 2, max: 50 }
+                    "FinishedQty": { number: true }
+                },
+                messages: {
+                    "PlanningDate": "",
+                    "PlannedQty": { number: "" },//, min: 2, max: 50 }
+                    "FinishedQty": { number: "" }
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_PlannedQtyMaster(id) {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false});
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+        function SaveSuccess_PlannedQtyMaster(data) {
+            var model = data.model;
+            if (data.msg == "success") {
+                Refresh_PlannerUpdateGrid(data);
+
+                $('#dvPlannedQtyModel').modal('hide');
+                alert("Planned Qty successfuly saved.");
+            }
+            else { alert("Error Occures"); }
+        }
+        function DeletePlannedQty($this, PlannerID, ProductID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeletePlannerMaster", "Productuser")",
+                    data: JSON.stringify({ "PlannerID": PlannerID, "ProductID": ProductID}),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $($this).closest('tr').remove();
+                        $(".plan-expand-row-" + PlannerID).remove();
+                        Refresh_PlannerUpdateGrid(data, true);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        function Refresh_PlannerUpdateGrid(data, is_Delete = false) {
+            console.log(data);
+            var model = data.model;
+            $(".total_PlannedQty").text(model.tot_plannedqty);
+            $(".total_FinishedQty").text(model.tot_finishedqty);
+
+            $(".sub-grid-row-" + model.obj.ProductID + " .subtotal_PlannedQty").text(model.sub_tot_plannedqty);
+            $(".sub-grid-row-" + model.obj.ProductID + " .subtotal_FinishedQty").text(model.sub_tot_finishedqty);
+            $(".sub-grid-row-" + model.obj.ProductID + " .subtotal_PlannedDay").text(model.tot_plannedDays);
+            //$(".sub-grid-row-" + model.obj.ProductID + " .subtotal_FinishedDay").text(model.tot_finishedDays);
+
+            $(".prod-row-" + model.obj.ProductID + " .PlannedQty").text(model.row_plannedqty);
+            $(".prod-row-" + model.obj.ProductID + " .FinishedQty").text(model.row_finishedqty);
+
+            if (!is_Delete) {
+                if (model.is_Edit == false) {
+                    var tr = "<tr class='plan-row-" + model.obj.PlannerID + "'><td class='toggle'><a onclick='ToggleFinishedGrid(this, " + model.obj.PlannerID + ");' class='cursor plan-toggle-" + model.obj.PlannerID+"'><i class='glyphicon glyphicon-plus'></i></a></td>";
+                    //tr += "<td class='action'><button type='button' onclick='AddEditPlannedQty(" + model.obj.PlannerID + ");' class='btnCRUD btn btn-xs btn-info'>Edit</button>";
+                    //tr += "<button type='button' onclick='DeletePlannedQty(this," + model.obj.PlannerID + ", " + model.obj.ProductID + ");' class='btnCRUD btn btn-xs btn-danger'>Delete</button></td>";
+                    tr += "<td>" + model.obj.PlannerID + "</td>";
+                    tr += "<td class='PlanningDate'>" + model.obj.PlanningDate_Display + "</td>";
+                    tr += "<td class='PlannedQty'>" + model.obj.PlannedQty + "</td>";
+                    tr += "<td class='FinishedQty'>" + model.obj.FinishedQty + "</td>";
+                    tr += "<td class='Remarks'>" + model.obj.Remarks + "</td>";
+                    tr += "</tr>";
+
+                    var sub_tr = "<tr class='plan-expand-row-" + model.obj.PlannerID + "'><td colspan='15' class='sub-grid2 hide sub-grid2-row-" + model.obj.PlannerID + "'>";
+                    //sub_tr += "<button id='btnAdd' type='button' onclick='AddEditFinishedQty(0," + model.obj.PlannerID + "," + model.obj.ProductID+")' class='btnCRUD btn btn-sm btn-primary mr-bt-10'>";
+                    sub_tr += "<i class='glyphicon glyphicon-plus'></i> Add Finished Qty </button>";
+                    sub_tr += "<table class='table table-striped table-bordered table-hover table-responsive'>";
+                    sub_tr += "<thead><tr><th class='action'>Action</th><th>FinishedID</th><th>FinishingDate</th><th>FinishedQty</th><th>Remarks</th></tr></thead>";
+                    sub_tr += "<tbody></tbody>";
+                    sub_tr += "<tfoot><tr class='bold'><td colspan='2'>&nbsp;</td> <td>Sub Total</td><td class='subtotal2_FinishedQty'>0</td><td></td></tr></tfoot>";
+                    sub_tr += "</table></td></tr>";
+                    console.log($(".sub-grid-row-" + model.obj.ProductID + " > table > tbody").length);
+
+                    $(".sub-grid-row-" + model.obj.ProductID + " > table > tbody").append(tr + sub_tr);
+
+                }
+                else {
+                    $(".sub-grid-row-" + model.obj.ProductID + " .plan-row-" + model.obj.PlannerID + " .PlanningDate").text(model.obj.PlanningDate_Display);
+                    $(".sub-grid-row-" + model.obj.ProductID + " .plan-row-" + model.obj.PlannerID + " .PlannedQty").text(model.obj.PlannedQty);
+                    $(".sub-grid-row-" + model.obj.ProductID + " .plan-row-" + model.obj.PlannerID + " .FinishedQty").text(model.obj.FinishedQty);
+                    $(".sub-grid-row-" + model.obj.ProductID + " .plan-row-" + model.obj.PlannerID + " .Remarks").text(model.obj.Remarks);
+                }
+            }
+            SetMGGrid();
+        }
+
+        //Add/Edit Finished Qty
+        function AddEditFinishedQty(FinishedID = 0, PlannerID, ProductID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditFinishedQty", "Productuser")",
+                data: JSON.stringify({ "FinishedID": FinishedID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvFinishedQtyModel').html(data);
+                    $('#dvFinishedQtyModel').modal('show');
+
+                    $("#frmFinishedQtyMaster input[name=ProductID]").val(ProductID);//need to update parent row qty
+                    if (FinishedID == 0) {
+                        $("#frmFinishedQtyMaster input[name=PlannerID]").val(PlannerID);
+                    }
+
+                    formValidation_FinishedQtyMaster();//Validation
+                    SetDatepicker_FinishedQtyMaster();//Set Datepicker
+                    $(".close_finishedqtymodel").click(function () {
+                        $('#dvFinishedQtyModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_FinishedQtyMaster() {
+            $("#frmFinishedQtyMaster").validate({
+                rules: {
+                    "FinishingDate": "required",
+                    "FinishedQty": { number: true }
+                },
+                messages: {
+                    "FinishingDate": "",
+                    "FinishedQty": { number: "" }
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_FinishedQtyMaster(id) {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false});
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+        function SaveSuccess_FinishedQtyMaster(data) {
+            console.log($("#frmFinishedQtyMaster input[name=ProductID]").val());
+            var model = data.model;
+            if (data.msg == "success") {
+                Refresh_FinishingUpdateGrid(data);
+
+                $('#dvFinishedQtyModel').modal('hide');
+                alert("Finished Qty successfuly saved.");
+            }
+            else { alert("Error Occures"); }
+
+        }
+        function DeleteFinishedQty($this, FinishedID, PlannerID, ProductID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteFinishedMaster", "Productuser")",
+                    data: JSON.stringify({ "FinishedID": FinishedID, "PlannerID": PlannerID, "ProductID": ProductID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $($this).closest('tr').remove();
+                        Refresh_FinishingUpdateGrid(data, true);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+        function Refresh_FinishingUpdateGrid(data, is_Delete = false) {
+            console.log(data);
+            var model = data.model;
+                $(".total_PlannedQty").text(model.tot_plannedqty);
+                $(".total_FinishedQty").text(model.tot_finishedqty);
+                $(".total_BalanceQty").text(model.tot_balanceqty);
+
+                //$(".sub-grid-row-" + model.obj.ProductID + " .subtotal_PlannedQty").text(model.sub_tot_plannedqty);
+                $(".sub-grid-row-" + model.obj.ProductID + " .subtotal_FinishedQty").text(model.sub_tot_finishedqty);
+
+                $(".sub-grid2-row-" + model.obj.PlannerID + " .subtotal2_FinishedQty").text(model.sub_tot_finishedqty2);
+
+                //$(".sub-grid-row-" + model.obj.ProductID + " .subtotal_FinishedDay").text(model.tot_finishedDays);
+
+                $(".prod-row-" + model.obj.ProductID + " .PlannedQty").text(model.row_product_plannedqty);
+                $(".prod-row-" + model.obj.ProductID + " .FinishedQty").text(model.row_product_finishedqty);
+                $(".prod-row-" + model.obj.ProductID + " .BalanceQty").text(model.row_product_balanceqty);
+
+                $(".plan-row-" + model.obj.PlannerID + " .FinishedQty").text(model.row_plan_finishedqty);
+
+            if (!is_Delete) {
+                if (model.is_Edit == false) {
+                    var tr = "<tr class='fin-row-" + model.obj.FinishedID + "'>";
+                    //tr += "<td class='action'><button type='button' onclick='AddEditFinishedQty(" + model.obj.FinishedID + "," + model.obj.PlannerID + "," + model.obj.ProductID + ");' class='btnCRUD btn btn-xs btn-info'>Edit</button>";
+                    //tr += " <button type='button' onclick='DeleteFinishedQty(this," + model.obj.FinishedID + "," + model.obj.PlannerID + "," + model.obj.ProductID + ");' class='btnCRUD btn btn-xs btn-danger'>Delete</button></td>";
+                    tr += "<td>" + model.obj.FinishedID + "</td>";
+                    tr += "<td class='FinishingDate'>" + model.obj.FinishingDate_Display + "</td>";
+                    tr += "<td class='FinishedQty'>" + model.obj.FinishedQty + "</td>";
+                    tr += "<td class='Remarks'>" + model.obj.Remarks + "</td>";
+                    tr += "</tr>";
+
+                    $(".sub-grid2-row-" + model.obj.PlannerID + " > table > tbody").append(tr);
+                }
+                else {
+                    $(".sub-grid2-row-" + model.obj.PlannerID + " .fin-row-" + model.obj.FinishedID + " .FinishingDate").text(model.obj.FinishingDate_Display);
+                    $(".sub-grid2-row-" + model.obj.PlannerID + " .fin-row-" + model.obj.FinishedID + " .FinishedQty").text(model.obj.FinishedQty);
+                    $(".sub-grid2-row-" + model.obj.PlannerID + " .fin-row-" + model.obj.FinishedID + " .Remarks").text(model.obj.Remarks);
+                }
+            }
+            SetMGGrid();
+        }
+
+
+        //Toggle PlannerGrid
+        function TogglePlannerGrid($this,ProductID) {
+            var id = '.sub-grid-row-' + ProductID;
+            if ($(id).hasClass('hide')) {
+                $(id).removeClass('hide');
+                $('.prod-toggle-' + ProductID).find('i').removeAttr('class').addClass('glyphicon glyphicon-minus');
+            }
+            else {
+                $(id).addClass('hide');
+                $('.prod-toggle-' + ProductID).find('i').removeAttr('class').addClass('glyphicon glyphicon-plus');
+            }
+        }
+        //Toggle FinishedGrid
+        function ToggleFinishedGrid($this,PlannerID) {
+            var id = '.sub-grid2-row-' + PlannerID;
+            if ($(id).hasClass('hide')) {
+                $(id).removeClass('hide');
+                $('.plan-toggle-' + PlannerID).find('i').removeAttr('class').addClass('glyphicon glyphicon-minus');
+            }
+            else {
+                $(id).addClass('hide');
+                $('.plan-toggle-' + PlannerID).find('i').removeAttr('class').addClass('glyphicon glyphicon-plus');
+            }
+        }
+
+        //$(document).ready(function () {
+        //    SetMGGrid();
+        //});
+
+        function SetMGGrid() {
+            console.log("SetMGGrid");
+            $("#tblProductGrid > tbody > tr").each(function () {
+                if ($(this).data("rowproductid") != null) {
+                    var proID = $(this).data("rowproductid");
+                    var plannedDay = $(".prod-expand-row-" + proID).find(".subtotal_PlannedDay").text();
+                    $(this).find(".mgPlannedDays").text(plannedDay);
+                    //var finishedDay = $(".prod-expand-row-" + proID).find(".subtotal_FinishedDay").text();
+                    //$(this).find(".mgFinishedDays").text(finishedDay);
+
+                    //nikunj set mgDelayedDays
+                    //var actualDay = $(this).find(".mgActualPlannedDays").text();
+                    //var dDay = parseFloat(finishedDay) - parseFloat(actualDay);
+                    //var delayedDay = (parseFloat(dDay) > 0) ? dDay : 0;
+                    //$(this).find(".mgDelayedDays").text(delayedDay);
+                }
+            });
+        }
+    </script>
+    @*start Grid paging/Sorting*@
+    <script>
+        bindGridEvent(tableName);
+        FilterCondition("condition", ControllerName, ActionName, tableList, tableName);
+        function DropDownChange($this) {//grid header filter dropdown change
+            Search(ControllerName, ActionName, tableList, tableName);
+        }
+    </script>
+}

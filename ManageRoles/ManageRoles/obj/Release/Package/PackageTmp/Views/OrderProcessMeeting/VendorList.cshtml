@@ -1,0 +1,80 @@
+﻿@using ManageRoles.Repository
+@model Vendor_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.VP_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblVendorGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|VendorFilterSearch|VendorList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblVendorGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">VP_ID</th>
+                <th class="action">BuyerOrderNumber</th>
+                <th class="action">VendorName</th>
+                <th class="action">Process</th>
+                <th class="action">SPC1</th>
+                <th class="action">SPC2</th>
+                <th class="action">SPC3</th>
+                <th class="action">InChargeName</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.pageList.Count > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.pageList)
+                {
+                    <tr class="vendor-row-@item.VP_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditVendor(@item.VP_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteVendor(@item.VP_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.VP_ID</td>
+                        <td>@item.BuyerOrderNumber</td>
+                        <td>@item.VendorName</td>
+                        <td>@item.Process</td>
+                        <td>@(item.SPC1 != null ? Convert.ToDateTime(item.SPC1).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.SPC2 != null ? Convert.ToDateTime(item.SPC2).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.SPC3 != null ? Convert.ToDateTime(item.SPC3).ToString("dd-MMM-yy") : "")</td>
+                        <td>@item.InChargeName</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="9">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "VendorFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "VendorList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblVendorGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

@@ -1,0 +1,118 @@
+﻿@using ManageRoles.Repository
+@using ManageRoles.Helpers
+@model ProductName_Model
+@{
+    ViewBag.Title = "ProductNameGrid";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+}
+@Html.Partial("_FilterMenu")
+
+<div class="row header-title">
+    <div class="title">
+        Product Name
+    </div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-6 pd-0 btnmrg">
+        <button id="btnAdd" type="button" onclick="AddEditProductName();" class="btnCRUD btn btn-sm btn-primary">
+            <i class="glyphicon glyphicon-plus"></i> Add ProductName
+        </button>
+    </div>
+    <div class="col-md-6 font-14">
+        <div id="lblmsg"></div>
+    </div>
+</div>
+
+<div class="row" id="ProductNameList">
+    @Html.Partial("ProductNameList", Model)
+</div>
+
+@* Add model after main div where model used in main div for CRUD Operation model for getting tablelist id *@
+<div id="dvProductNameModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<link href="~/Content/bootstrap-multiselect.css" rel="stylesheet" />
+@section scripts{
+    <link href="~/Content/CommonGrid.css" rel="stylesheet" />
+    <link href="~/Content/animate.min.css" rel="stylesheet" />
+    <link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.datetimepicker.full.js"></script>
+    <script src="~/Scripts/bootstrap-multiselect.js"></script>
+    <script src="~/Scripts/Common.js"></script>
+    <script type="text/javascript">
+        rootUrl = "@Url.Content("~/")";
+        var ControllerName = "AllUsers";
+        var ActionName = "ProductNameFilterSearch";
+        var tableList = "ProductNameList";
+        var tableName = "tblProductNameGrid";//For Grid
+        var dvModel = "dvModel";
+        var frnName = "frmProductName";
+
+        //Add/Edit ProductName Master
+        function AddEditProductName(ID = 0) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditProductName", "AllUsers")",
+                data: JSON.stringify({ "ID": ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvProductNameModel').html(data);
+                    $('#dvProductNameModel').modal('show');
+
+                    formValidation_ProductName();//Validation
+                    $(".close_product_model").click(function () {
+                        $('#dvProductNameModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_ProductName() {
+            $("#frmProductName").validate({
+                rules: {
+                    "Productname": "required"
+                },
+                messages: {
+                    "Productname": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+
+        function SaveSuccess_ProductName(tableHtml) {
+            $("#" + tableList).html(tableHtml);
+            $('#dvProductNameModel').modal('hide');
+            bindGridEvent(tableName); //initialize grid functions
+            alert("ProductName successfuly saved.");
+        }
+        function OnFailure(msg) {
+            if (msg.statusText == "exists") { alert("ProductName Name already exists.");}
+        }
+        function DeleteProductName(ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteProductName", "AllUsers")",
+                    data: JSON.stringify({ "ID": ID, fieldName: setFieldName, sortOrder: setSortorder, 'StaticPageSize': 10 }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableList).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+    </script>
+    @*start Grid paging/Sorting*@
+    <script>
+        bindGridEvent(tableName);
+        FilterCondition("condition", ControllerName, ActionName, tableList, tableName);
+        function DropDownChange($this) {//grid header filter dropdown change
+            Search(ControllerName, ActionName, tableList, tableName);
+        }
+    </script>
+}

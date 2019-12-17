@@ -1,0 +1,140 @@
+﻿@using ManageRoles.Repository
+@model PKGKDList_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SavePKGKDList", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "SaveSuccess_PKGKDList", OnFailure = "OnFailurePKGKDList" }, new { id = "frmPKGKDList", data_tablename = "tblPKGKDListGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.PkgDesID > 0)
+                    {@Html.Raw("Update PKGKDList") }
+                else
+                { @Html.Raw("Add PKGKDList")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Packaging ID</label>
+                            @Html.HiddenFor(d => d.Table.OPM_ID)
+                            @Html.TextBoxFor(d => d.Table.PkgDesID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            @*@Html.HiddenFor(d => d.Table.ProductID)*@
+                            <label class="control-label1">Buyer Order Number</label>
+                            @Html.DropDownListFor(d => d.Table.BuyerOrderName, Model.BuyerOrderNumberList, "[None]", new { @class = "form-control", onchange = "ChangeBuyerOrderNumberList(this)" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">PI Number</label>
+                            @Html.TextBoxFor(d => d.Table.PINumber, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product Name </label>
+                            @Html.TextBoxFor(d => d.Table.Productname, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">OPMPKGList Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var OPMPKGDate = "";
+                                    if (Model.Table != null && Model.Table.OPMPKGListDate != null)
+                                    {
+                                        OPMPKGDate = Model.Table.OPMPKGListDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.OPMPKGListDate, String.Format("{0:d}", OPMPKGDate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_OPMPKGListDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">BuyerPKGListDate Date </label>
+                            <div class="input-group">
+                                @{
+                                    var OPMBYRPKGDate = "";
+                                    if (Model.Table != null && Model.Table.BuyerPKGListDate != null)
+                                    {
+                                        OPMBYRPKGDate = Model.Table.BuyerPKGListDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.BuyerPKGListDate, String.Format("{0:d}", OPMBYRPKGDate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_BuyerPKGListDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">OPMKDListDate Date </label>
+                            <div class="input-group">
+                                @{
+                                    var OPMKDDate = "";
+                                    if (Model.Table != null && Model.Table.OPMKDListDate != null)
+                                    {
+                                        OPMKDDate = Model.Table.OPMKDListDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.OPMKDListDate, String.Format("{0:d}", OPMKDDate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_OPMKDListDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">BuyerKDListDate Date </label>
+                            <div class="input-group">
+                                @{
+                                    var BYRKDDate = "";
+                                    if (Model.Table != null && Model.Table.BuyerKDListDate != null)
+                                    {
+                                        BYRKDDate = Model.Table.BuyerKDListDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.BuyerKDListDate, String.Format("{0:d}", BYRKDDate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_BuyerKDListDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Remarks </label>
+                            @Html.TextBoxFor(d => d.Table.Remarks, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+                                    }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+
+

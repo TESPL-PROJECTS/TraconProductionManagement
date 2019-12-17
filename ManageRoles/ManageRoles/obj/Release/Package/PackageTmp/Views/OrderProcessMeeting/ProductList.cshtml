@@ -1,0 +1,103 @@
+﻿@using ManageRoles.Repository
+@model ProductUpdateGrid_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.ProductID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblProductGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|ProductFilterSearch|ProductList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblProductGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">ProductID</th>
+                <th class="action">ArticleNumber</th>
+                <th class="action">DesignNumber</th>
+                <th class="action">Productname</th>
+                <th class="action">Processname</th>
+                <th class="action">Suppliername</th>
+                <th class="action">Buyername</th>
+                <th class="action">BuyerOrderNumberName</th>
+                <th class="action">StartDate</th>
+                <th class="action">SPCDate</th>
+                <th class="action">Size</th>
+                <th class="action">Colour</th>
+                <th class="action">CountConstruction</th>
+                <th class="action">Unit</th>
+                <th class="action">SetNote</th>
+                <th class="action">ProductQty</th>
+                <th class="action">Remarks</th>
+                <th class="action">StoryName</th>
+                <th class="action">Status</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.ProductsList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.ProductsList)
+                {
+                <tr class="Product-row-@item.ProductID">
+                    <td class="action">
+                        <button type="button" onclick="AddEditProduct(@item.ProductID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                        <button type="button" onclick="DeleteProduct(@item.ProductID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                    </td>
+                    <td>@item.ProductID</td>
+                    <td>@item.ArticleNumber</td>
+                    <td>@item.DesignNumber</td>
+                    <td>@item.Productname</td>
+                    <td>@item.Processname</td>
+                    <td>@item.Suppliername</td>
+                    <td>@item.Buyername</td>
+                    <td>@item.BuyerOrderNumberName</td>
+                    <td>@(item.StartDate != null ? Convert.ToDateTime(item.StartDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.SPCDate != null ? Convert.ToDateTime(item.SPCDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@item.Size</td>
+                    <td>@item.Colour</td>
+                    <td>@item.CountConstruction</td>
+                    <td>@item.Unit</td>
+                    <td>@item.SetNote</td>
+                    <td>@item.ProductQty</td>
+                    <td>@item.Remarks</td>
+                    <td>@item.StoryName</td>
+                    <td>@item.Status</td>
+                </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="22">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="19">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "ProductFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "ProductList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblProductGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

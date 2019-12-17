@@ -1,0 +1,74 @@
+﻿@using ManageRoles.Repository
+@model QAInfo_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.QAInfo_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblQAInfoGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|QAInfoFilterSearch|QAInfoList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblQAInfoGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">QAInfo_ID</th>
+                <th class="action">External Agency inspection</th>
+                <th class="action">Target to send request before # days of Inspection</th>
+                <th class="action">Target date to send sample for approval</th>
+                <th class="action">Target date to send Sealer sample</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.QAInfoList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.QAInfoList)
+                {
+                    <tr class="QAInfo-row-@item.QAInfo_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditQAInfo(@item.QAInfo_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteQAInfo(@item.QAInfo_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.QAInfo_ID</td>
+                        <td>@(item.ExternalAgencyInspection != null ? Convert.ToString(item.ExternalAgencyInspection) : "False")</td>
+                        <td>@item.SendRequestBeforeDay</td>
+                        <td>@(item.SendSampleForApproval != null ? Convert.ToDateTime(item.SendSampleForApproval).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.SendSealerSample != null ? Convert.ToDateTime(item.SendSealerSample).ToString("dd-MMM-yy") : "")</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="6">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "QAInfoFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "QAInfoList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblQAInfoGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

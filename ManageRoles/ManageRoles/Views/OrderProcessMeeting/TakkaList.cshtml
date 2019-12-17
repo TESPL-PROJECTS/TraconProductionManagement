@@ -1,0 +1,82 @@
+﻿@using ManageRoles.Repository
+@model Takka_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.Takka_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblTakkaGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|TakkaFilterSearch|TakkaList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblTakkaGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">Takka_ID</th>
+                <th class="action">First Takka</th>
+                <th class="action">Total No's</th>
+                <th class="action">Date</th>
+                <th class="action">Total SKU's</th>
+                <th class="action">Testing sample submission</th>
+                <th class="action">Report receipt Target</th>
+                <th class="action">Production Sample</th>
+                <th class="action">Cartonable Lot</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.TakkaList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.TakkaList)
+                {
+                    <tr class="Takka-row-@item.Takka_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditTakka(@item.Takka_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteTakka(@item.Takka_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.Takka_ID</td>
+                        <td>@item.FirstTakka</td>
+                        <td>@item.TotalNo</td>
+                        <td>@(item.Date != null ? Convert.ToDateTime(item.Date).ToString("dd-MMM-yy") : "")</td>
+                        <td>@item.TotalSKU</td>
+                        <td>@(item.SampleSubmission != null ? Convert.ToDateTime(item.SampleSubmission).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.ReportReceipt != null ? Convert.ToDateTime(item.ReportReceipt).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.ProductionSample != null ? Convert.ToDateTime(item.ProductionSample).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.CartonableLot != null ? Convert.ToDateTime(item.CartonableLot).ToString("dd-MMM-yy") : "")</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="10">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "TakkaFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "TakkaList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblTakkaGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

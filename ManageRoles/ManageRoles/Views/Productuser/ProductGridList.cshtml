@@ -1,0 +1,449 @@
+﻿@using ManageRoles.Repository
+@model ProductUpdateGrid_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int i = 0;
+    int count = Model.Filters.Count() + 2;
+    int id = Model.Table == null ? 0 : Model.Table.ProductID;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblProductGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "Productuser|ProductGridFilterSearch|ProductGridList|tblProductGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                @*<th class="text-center" width="4%">
+                        <label class="mt-checkbox  mt-checkbox-outline">
+                            <input type="checkbox" id="chkAll" class="group-checkable" />
+                            <span></span>
+                        </label>
+                    </th>*@
+                <th class="toggle">&nbsp;</th>
+                @*<th class="action">Action</th>*@
+                @foreach (var filter in Model.Filters)
+                {
+                    if (filter.ColumnName.ToLower() != "id")
+                    {
+
+                <th class="@filter.ColumnName">
+                    @if (filter.ColumnName == "IsActive" || filter.ColumnName == "IsDefault")
+                    {
+                        @Html.Sorter(filter.ColumnName, filter.DisplayText, Model.dynamicListMetaData.TotalItemCount, "ProductGridFilterSearch", "Product", new AjaxOptions() { UpdateTargetId = "ProductGridList", OnSuccess = "bindGridEvent('tblProductGrid')", OnBegin = "beforePage" }, new { page = Model.dynamicListMetaData.PageNumber, sortOrder = filter.ColumnName == Model.fieldName ? Model.sortOrder : "" })
+                        <div class="input-group">
+                @Html.CustomCheckbox(filter.ColumnName, filter.Value == null ? "false" : filter.Value, new { @class = "group-checkable mg-rt-2", data_column = filter.ColumnName, data_condition = (string.IsNullOrEmpty(filter.Condition) ? "false" : filter.Condition) })
+                <a class="input-group-addon btn btn-icon-only @(string.IsNullOrEmpty(filter.Condition) ? "btn-filter" : "btn-red")" id="@Html.Raw("filter" + i)">
+                    <i class="@(string.IsNullOrEmpty(filter.Condition) ? "glyphicon glyphicon-filter" : "glyphicon glyphicon-remove")"></i>
+                </a>
+            </div>
+                    }
+                    else
+                    {
+                        @Html.Sorter(filter.ColumnName, filter.DisplayText, Model.dynamicListMetaData.TotalItemCount, "ProductGridFilterSearch", "Product", new AjaxOptions() { UpdateTargetId = "ProductGridList", OnSuccess = "bindGridEvent('tblProductGrid')", OnBegin = "beforePage" }, new { page = Model.dynamicListMetaData.PageNumber, sortOrder = filter.ColumnName == Model.fieldName ? Model.sortOrder : "" })
+                        <div class="input-group">
+                <input type="text" class="form-control input-sm txt-filter" onabort="checkState(this)" data-pastvalue="@filter.Value" data-column="@filter.ColumnName" data-condition="@(string.IsNullOrEmpty(filter.Condition) ? "No" : filter.Condition)" value="@filter.Value" />
+                <a class="input-group-addon btn btn-icon-only  @(string.IsNullOrEmpty(filter.Condition) ? "btn-filter" : "btn-red") " id="@Html.Raw("filter" + i)">
+                    <i class="@(string.IsNullOrEmpty(filter.Condition) ? "glyphicon glyphicon-filter" : "glyphicon glyphicon-remove")"></i>
+                </a>
+            </div>
+                    }
+                </th>
+                    }
+                    i++;
+                }
+                <th class="toggle">Actual Planned Days</th>
+                <th class="toggle">Planned Days</th>
+                <th class="toggle">Finished Days</th>
+                <th class="toggle">Delayed Days</th>
+                <th class="toggle">% Completed</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.dynamicList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.dynamicList)
+                {
+                    <tr class="prod-row-@item.ProductID" data-rowproductid="@item.ProductID">
+                        @*<td class="text-center">
+                                <label class="mt-checkbox  mt-checkbox-outline">
+                                    <input type="checkbox" id="chkRow" class="group-checkable" value="@item.ProductID" />
+                                    <span></span>
+                                </label>
+                            </td>*@
+                        <td class="toggle">
+                            <a onclick="TogglePlannerGrid(this,@item.ProductID);" class="cursor prod-toggle-@item.ProductID">
+                                <i class="glyphicon glyphicon-plus"></i>
+                            </a>
+                        </td>
+                        @*<td class="action">
+                                <button type="button" onclick="AddEditProductMaster(@item.ProductID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                                <button type="button" onclick="DeleteProductMaster(@item.ProductID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                            </td>*@
+                        @foreach (var column in item)
+                        {
+                            string columnName = column.Key;
+                            string columnValue = column.Value == null ? string.Empty : Convert.ToString(column.Value);
+                            if (columnName.ToLower() != "id")
+                            {
+                                <td @(columnName == "CityID" ? "style=display:none" : "") class="@columnName">
+                                    @if (columnName.Contains("IsActive"))
+                                    {
+                                        columnValue = columnValue == null ? "false" : columnValue;
+                                        @Html.CustomCheckbox(columnName, columnValue == null ? "false" : columnValue, new { @disabled = "disabled" })
+                                    }
+                                    else if (columnName.ToLower().Contains("date"))
+                                    {
+                                        columnValue = string.IsNullOrEmpty(columnValue) ? "" : Convert.ToDateTime(columnValue).ToString("dd-MMM-yy");
+                                        @Html.Raw(columnValue)
+                                    }
+                                    else if (columnName.ToLower() == "status")
+                                    {
+                                        if (item.BalanceQty == 0)
+                                        {
+                                            @Html.Raw("Completed")
+                                        }
+                                        else if (item.PlannedQty == 0)
+                                        {
+                                            @Html.Raw("Unplanned")
+                                        }
+                                        else if (item.PlannedQty > 0)
+                                        {
+                                            @Html.Raw("Progressing")
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw(columnValue)
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(columnValue)
+                                    }
+                                </td>
+                            }
+                        }
+                        <td class="mgActualPlannedDays">
+                            @{
+                                DateTime StartDate = DateTime.Now.Date;
+                                DateTime SPCDate = DateTime.Now.Date;
+                                if (item.SPCDate != null)
+                                {
+                                    SPCDate = Convert.ToDateTime(item.SPCDate);
+                                }
+                                if (item.StartDate != null)
+                                {
+                                    StartDate = Convert.ToDateTime(item.StartDate);
+                                }
+                                double days = (SPCDate.Date - StartDate.Date).TotalDays;
+                                if (days < 0)
+                                {
+                                    @Html.Raw("0")
+                                }
+                                else
+                                {
+                                    @Html.Raw(days)
+                                }
+                            }
+                        </td>
+                        <td class="mgPlannedDays"></td>
+                        <td class="mgFinishedDays">
+                            @{
+                                DateTime skuStartDate = DateTime.Now.Date;
+                                DateTime skuEndDate = DateTime.Now.Date;
+                                object skuEndDate1 = item.SKUEndDate;
+                                object skuStartDate1 = item.SKUStartDate;
+                                if (skuEndDate1 != null && skuEndDate1 != System.DBNull.Value)
+                                {
+                                    skuEndDate = Convert.ToDateTime(skuEndDate1);
+                                }
+                                if (skuStartDate1 != null && skuStartDate1 != System.DBNull.Value)
+                                {
+                                    skuStartDate = Convert.ToDateTime(skuStartDate1);
+                                }
+                                if (skuEndDate == null || skuStartDate == null)
+                                {
+                                    @Html.Raw("0")
+                                }
+                                else
+                                {
+                                    double skudays = (skuEndDate.Date - skuStartDate.Date).TotalDays;
+                                    if (skudays < 0)
+                                    {
+                                        @Html.Raw("0")
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(skudays)
+                                    }
+                                }
+                            }
+                        </td>
+                        <td class="mgDelayedDays">
+                            @{
+                                DateTime? startDate2 = null;
+                                DateTime? endDate2 = null;
+                                object skuEndDate2 = item.SKUEndDate;
+                                object spcDate2 = item.SPCDate;
+                                if (skuEndDate2 != null && skuEndDate2 != System.DBNull.Value)
+                                {
+                                    endDate2 = Convert.ToDateTime(skuEndDate2);
+                                }
+                                if (spcDate2 != null && spcDate2 != System.DBNull.Value)
+                                {
+                                    startDate2 = Convert.ToDateTime(spcDate2);
+                                }
+                                if (endDate2 == null || startDate2 == null)
+                                {
+                                    @Html.Raw("0")
+                                }
+                                else
+                                {
+                                    double delayedDays = (endDate2.Value.Date - startDate2.Value.Date).TotalDays;
+                                    if (delayedDays < 0)
+                                    {
+                                        @Html.Raw("0")
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(delayedDays)
+                                    }
+                                }
+                            }
+                        </td>
+                        <td>
+                            @{
+                                double fQnty = 0;
+                                double pQnty = 0;
+                                if (item.FinishedQty != null)
+                                {
+                                    fQnty = Convert.ToDouble(item.FinishedQty);
+                                }
+                                if (item.PlannedQty != null)
+                                {
+                                    pQnty = Convert.ToDouble(item.ProductQty);
+                                }
+                                if (fQnty != 0)
+                                {
+                                    @Html.Raw(((fQnty / pQnty) * 100).ToString("#.##"))
+                                }
+                                else
+                                {
+                                    @Html.Raw("0")
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr class="prod-expand-row-@item.ProductID">
+                        <td colspan="15" class="sub-grid hide sub-grid-row-@item.ProductID">
+                            <button id="btnAdd" type="button" onclick="AddEditPlannedQty(0,@item.ProductID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                <i class="glyphicon glyphicon-plus"></i> Add Planned Qty
+                            </button>
+                            <table class="table table-striped table-bordered table-hover1 table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th class="toggle">&nbsp;</th>
+                                        @*<th class="action">Action</th>*@
+                                        <th class="th_PlannerID">PlannerID</th>
+                                        <th class="th_PlanningDate">PlanningDate</th>
+                                        <th class="th_PlannedQty">PlannedQty</th>
+                                        <th class="th_FinishedQty">FinishedQty</th>
+                                        <th>Remarks</th>
+                                        <th style="display:none">Planned Days</th>
+                                        @*<th style="display:none">Finished Days</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var lstPlannedQty = Model.PlannerUpdateGridList.Where(d => d.ProductID == item.ProductID).ToList();
+                                        //int cntFinishedGrid = 0;
+                                    }
+                                    @foreach (var item_planner in lstPlannedQty)
+                                    {
+                                        <tr class="plan-row-@item_planner.PlannerID">
+                                            <td class="toggle">
+                                                <a onclick="ToggleFinishedGrid(this,@item_planner.PlannerID);" class="cursor plan-toggle-@item_planner.PlannerID">
+                                                    <i class="glyphicon glyphicon-plus"></i>
+                                                </a>
+                                            </td>
+                                            @*<td class="action">
+                                                <button type="button" onclick="AddEditPlannedQty(@item_planner.PlannerID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                                                <button type="button" onclick="DeletePlannedQty(this,@item_planner.PlannerID,@item_planner.ProductID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                                            </td>*@
+                                            <td>@item_planner.PlannerID</td>
+                                            <td class="PlanningDate">
+                                                @{string PlanningDate = item_planner.PlanningDate == null ? "" : Convert.ToDateTime(item_planner.PlanningDate).ToString("dd-MMM-yy");}
+                                                @Html.Raw(PlanningDate)
+                                            </td>
+                                            <td class="PlannedQty">@item_planner.PlannedQty</td>
+                                            <td class="FinishedQty">@item_planner.FinishedQty</td>
+                                            <td class="Remarks">@item_planner.Remarks</td>
+                                            <td class="PlannedDay" style="display:none">7</td>
+                                            <td class="PFinishedDay" style="display:none"></td>
+                                        </tr>
+
+                                        <tr class="plan-expand-row-@item_planner.PlannerID">
+                                            <td colspan="7" class="sub-grid2 hide sub-grid2-row-@item_planner.PlannerID">
+                                                <button id="btnAdd" type="button" onclick="AddEditFinishedQty(0,@item_planner.PlannerID,@item.ProductID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                                    <i class="glyphicon glyphicon-plus"></i> Add Finished Qty
+                                                </button>
+                                                <table class="table table-striped table-bordered table-hover table-responsive">
+                                                    <thead>
+                                                        <tr>
+                                                            @*<th class="action">Action</th>*@
+                                                            <th class="th_FinishedID">FinishedID</th>
+                                                            <th class="th_FinishingDate">FinishingDate</th>
+                                                            <th class="th_FinishedQty">FinishedQty</th>
+                                                            <th>Remarks</th>
+                                                            @*<th style="display:none">Finished Days</th>*@
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{
+                                                            var lstFinishedQty = Model.FinishingUpdateGridList.Where(d => d.PlannerID == item_planner.PlannerID).ToList();
+                                                            //if (lstFinishedQty.Count() > 0)
+                                                            //{
+                                                            //    cntFinishedGrid++;
+                                                            //}
+                                                            //int cntFinishedGridRow = 0;
+                                                        }
+                                                        @foreach (var item_finished in lstFinishedQty)
+                                                        {
+                                                            //cntFinishedGridRow++;
+                                                            <tr class="fin-row-@item_finished.FinishedID">
+                                                                @*<td class="action">
+                                                                    <button type="button" onclick="AddEditFinishedQty(@item_finished.FinishedID,@item_finished.PlannerID,@item.ProductID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                                                                    <button type="button" onclick="DeleteFinishedQty(this,@item_finished.FinishedID,@item_finished.PlannerID,@item.ProductID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                                                                </td>*@
+                                                                <td>@item_finished.FinishedID</td>
+                                                                <td class="FinishingDate">
+                                                                    @{string FinishingDate = item_finished.FinishingDate == null ? "" : Convert.ToDateTime(item_finished.FinishingDate).ToString("dd-MMM-yy");}
+                                                                    @Html.Raw(FinishingDate)
+                                                                </td>
+                                                                <td class="FinishedQty">@item_finished.FinishedQty</td>
+                                                                <td class="Remarks">@item_finished.Remarks</td>
+                                                                @*<td class="FFinishedDay" style="display:none"></td>*@
+                                                            </tr>
+                                                                        }
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr class="bold">
+                                                            <td colspan="1">&nbsp;</td>
+                                                            <td>Sub Total</td>
+                                                            <td class="subtotal2_FinishedQty">
+                                                                @{ var subtotal_FinishedQty1 = lstFinishedQty.Sum(d => d.FinishedQty);}
+                                                                @subtotal_FinishedQty1
+                                                            </td>
+                                                            <td></td>
+                                                            @*<td style="display:none">@(cntFinishedGridRow > 0 ? "7" : "")</td>*@
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </td>
+                                            @*<td colspan="9">&nbsp;</td>*@
+                                        </tr>
+                                                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bold">
+                                        <td colspan="2">&nbsp;</td>
+                                        <td>Sub Total</td>
+                                        <td class="subtotal_PlannedQty">
+                                            @{ var subtotal_PlannedQty = lstPlannedQty.Sum(d => d.PlannedQty);}
+                                            @subtotal_PlannedQty
+                                        </td>
+                                        <td class="subtotal_FinishedQty">
+                                            @{ var subtotal_FinishedQty = lstPlannedQty.Sum(d => d.FinishedQty);}
+                                            @subtotal_FinishedQty
+                                        </td>
+                                        <td></td>
+                                        <td class="subtotal_PlannedDay" style="display:none">
+                                            @{ var plannedDay = lstPlannedQty.Count() > 0 ? lstPlannedQty.Count() * 7 : 0;}
+                                            @Html.Raw(plannedDay)
+                                        </td>
+                                        @*<td class="subtotal_FinishedDay" style="display:none">
+                                                @{ var finishedDay = cntFinishedGrid > 0 ? cntFinishedGrid * 7 : 0;}
+                                                @Html.Raw(finishedDay)
+                                            </td>*@
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </td>
+                        <td colspan="8" class="sub-grid hide sub-grid-hide-row-@item.ProductID border-lt0">&nbsp;</td>
+                    </tr>
+                                                }
+                <tr class="bold">
+                    <td colspan="15">&nbsp;</td>
+                    <td>Grand Total</td>
+                    <td class="total_ProductQty">
+                        @{ var total_ProductQty = Model.dynamicList.Sum(d => (decimal?)d.ProductQty);}
+                        @total_ProductQty
+                    </td>
+                    <td class="total_FinishedQty">
+                        @{ var total_FinishedQty = Model.dynamicList.Sum(d => (decimal?)d.FinishedQty);}
+                        @total_FinishedQty
+                    </td>
+                    <td class="total_BalanceQty">
+                        @{ var total_BalanceQty = Model.dynamicList.Sum(d => (decimal?)d.BalanceQty);}
+                        @total_BalanceQty
+                    </td>
+                    <td class="total_PlannedQty">
+                        @{ var total_PlannedQty = Model.dynamicList.Sum(d => (decimal?)d.PlannedQty);}
+                        @total_PlannedQty
+                    </td>
+                    <td class="total_DifferenceQty">
+                        @*@{ var total_DifferenceQty = Model.dynamicList.Sum(d => d.DifferenceQty);}
+                            @total_DifferenceQty*@
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+                            }
+                            else
+                            {
+                                <tbody>
+                                    <tr>
+                                        <td colspan="@(count + 4)">
+                                            No data
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            }
+        <tfoot>
+            @if (Model != null && Model.dynamicList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="@(count + 4)">
+                        @{
+                            MVCPagerModel objMVCPagerModel = new MVCPagerModel();
+                            objMVCPagerModel.ActionName = "ProductGridFilterSearch";
+                            objMVCPagerModel.ControllerName = "Product";
+                            objMVCPagerModel.UpdateTargetId = "ProductGridList";
+                            objMVCPagerModel.TableUpdate = "tblProductGrid";
+                            objMVCPagerModel.DynamicList = Model.dynamicList;
+                            objMVCPagerModel.DynamicListMetaData = Model.dynamicListMetaData;
+                            objMVCPagerModel.sortOrder = Model.sortOrder;
+                            objMVCPagerModel.fieldName = Model.fieldName;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                        }
+                        @Html.Partial("_MVCPager", objMVCPagerModel)
+                    </td>
+                </tr>
+                            }
+        </tfoot>
+    </table>
+</div>
+<script>
+    if (typeof SortSetting == 'function') {
+        SortSetting('@(Model.sortOrder == null ? "" : Model.sortOrder)', '@(Model.fieldName == null ? "" : Model.fieldName)');
+    }
+</script>
+
+
+

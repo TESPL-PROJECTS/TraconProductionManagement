@@ -1,0 +1,154 @@
+﻿@using ManageRoles.Repository
+@model Takka_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveTakka", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "SaveSuccess_Takka", OnFailure = "OnFailureTakka" }, new { id = "frmTakka", data_tablename = "tblTakkaGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.Takka_ID > 0)
+                    {@Html.Raw("Update Takka") }
+                else
+                { @Html.Raw("Add Takka")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product ID</label>
+                            @Html.HiddenFor(d => d.Table.OPM_ID)
+                            @Html.TextBoxFor(d => d.Table.Takka_ID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">FirstTakka </label>
+                            @Html.TextBoxFor(m => m.Table.FirstTakka, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Total No's </label>
+                            @Html.TextBoxFor(m => m.Table.TotalNo, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Date </label>
+                            <div class="input-group">
+                                @*MMM dd, yyyy HH:mm*@
+                                @{
+                                    var startdate = "";
+                                    if (Model.Table != null && Model.Table.Date != null)
+                                    {
+                                        startdate = Model.Table.Date.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.Date, String.Format("{0:d}", startdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_Date" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Total SKU's </label>
+                            @Html.TextBoxFor(m => m.Table.TotalSKU, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Testing sample submission </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.SampleSubmission != null)
+                                    {
+                                        spcdate = Model.Table.SampleSubmission.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.SampleSubmission, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_SampleSubmission" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Report receipt Target </label>
+                            <div class="input-group">
+                                @{
+                                    var dt = "";
+                                    if (Model.Table != null && Model.Table.ReportReceipt != null)
+                                    {
+                                        dt = Model.Table.ReportReceipt.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.ReportReceipt, String.Format("{0:d}", dt), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_ReportReceipt" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Production Sample </label>
+                            <div class="input-group">
+                                @{
+                                    var dt1 = "";
+                                    if (Model.Table != null && Model.Table.ProductionSample != null)
+                                    {
+                                        dt1 = Model.Table.ProductionSample.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.ProductionSample, String.Format("{0:d}", dt1), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_ProductionSample" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Cartonable Lot </label>
+                            <div class="input-group">
+                                @{
+                                    var dt2 = "";
+                                    if (Model.Table != null && Model.Table.CartonableLot != null)
+                                    {
+                                        dt2 = Model.Table.CartonableLot.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.CartonableLot, String.Format("{0:d}", dt2), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_CartonableLot" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+
+
+
+

@@ -1,0 +1,82 @@
+﻿@using ManageRoles.Repository
+@model PKGKDList_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.PkgDesID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblPKGKDListGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|PKGKDListFilterSearch|PKGKDListList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblPKGKDListGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">PkgDesID</th>
+                <th class="action">BuyerOrderName</th>
+                <th class="action">PINumber</th>
+                <th class="action">Productname</th>
+                <th class="action">OPMPKGListDate</th>
+                <th class="action">BuyerPKGListDate</th>
+                <th class="action">OPMKDListDate</th>
+                <th class="action">BuyerKDListDate</th>
+                <th class="action">Remarks</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.pageList.Count > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.pageList)
+                {
+                <tr class="PKGKDList-row-@item.PkgDesID">
+                    <td class="action">
+                        <button type="button" onclick="AddEditPKGKDList(@item.PkgDesID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                        <button type="button" onclick="DeletePKGKDList(@item.PkgDesID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                    </td>
+                    <td>@item.PkgDesID</td>
+                    <td>@item.BuyerOrderName</td>
+                    <td>@item.PINumber</td>
+                    <td>@item.Productname</td>
+                    <td>@(item.OPMPKGListDate != null ? Convert.ToDateTime(item.OPMPKGListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.BuyerPKGListDate != null ? Convert.ToDateTime(item.BuyerPKGListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.OPMKDListDate != null ? Convert.ToDateTime(item.OPMKDListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.BuyerKDListDate != null ? Convert.ToDateTime(item.BuyerKDListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@item.Remarks</td>
+                </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="10">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "PKGKDListFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "PKGKDListList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblPKGKDListGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

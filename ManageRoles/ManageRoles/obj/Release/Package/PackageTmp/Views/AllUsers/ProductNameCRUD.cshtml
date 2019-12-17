@@ -1,0 +1,50 @@
+﻿@using ManageRoles.Repository
+@model ProductName_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveProductName", "AllUsers", "", new AjaxOptions() { HttpMethod = "POST", OnBegin = "beforePage", OnSuccess = "SaveSuccess_ProductName", OnFailure = "OnFailure" }, new { id = "frmProductName", data_tablename = "tblProductNameGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.PrdID > 0)
+                    {@Html.Raw("Update ProductName") }
+                else
+                { @Html.Raw("Add ProductName")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        @Html.HiddenFor(c => c.Table.PrdID)
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Product Name</label>
+                            @Html.TextBoxFor(d => d.Table.ProductName, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,1130 @@
+﻿@using ManageRoles.Repository
+@using ManageRoles.Helpers
+@model OPM_Model
+@{
+    ViewBag.Title = "OPMGrid";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+@Html.Partial("_FilterMenu")
+<style>
+    .divHScroll {
+        width: 700px;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+</style>
+<div class="row header-title">
+    <div class="title">Order Process Meeting</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-6 pd-0 btnmrg">
+        <button id="btnAdd" type="button" onclick="AddEditOPM();" class="btnCRUD btn btn-sm btn-primary">
+            <i class="glyphicon glyphicon-plus"></i> Add OPM
+        </button>
+    </div>
+    <div class="col-md-6 font-14">
+        <div id="lblmsg"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12" id="OPMList">
+        @Html.Partial("OPMList", Model)
+    </div>
+</div>
+@* Add model after main div where model used in main div for CRUD Operation model for getting tablelist id *@
+<div id="dvOPMModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvStyleModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvTakkaModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvTargetModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvQAInfoModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvQAInspectionModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvPKGKDListModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvProductModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvPlannedQtyModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvFinishedQtyModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<div id="dvVendorModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+
+
+<div id="dvProductImportModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    @*@using (Html.BeginForm("ProductImport", "OrderProcessMeeting", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+        {
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <button type="button" class="close"
+                                data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                        <h4 class="modal-title">
+                            Import
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal1">
+                            <div class="form-body">
+                                <div class="form-group col-md-4">
+                                    <label class="control-label1">Upload</label>
+                                    <input type="hidden" id="Import_OPM_ID" name="Import_OPM_ID"/>
+                                    <input type="file" id="fileUpload" class="btn btn-primary" name="FileUpload" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success" name="UploadImport" id="fileImport"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                            <button type="button" class="btn btn-danger" onclick="ImportProductClose()"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }*@
+    <form id="frmProductImport" method="post" enctype="multipart/form-data">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title">
+                        Import
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal1">
+                        <div class="form-body">
+                            <div class="form-group col-md-4">
+                                <label class="control-label1">Upload</label>
+                                <input type="hidden" id="Import_OPM_ID" name="Import_OPM_ID" />
+                                <input type="file" id="fileUpload" class="btn btn-primary" name="FileUpload" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" name="UploadImport" id="fileImport" onclick="SaveImport()"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger" onclick="ImportProductClose()"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<link href="~/Content/MvcGrid/mvc-grid.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-multiselect.css" rel="stylesheet" />
+@section scripts{
+    <link href="~/Content/CommonGrid.css" rel="stylesheet" />
+    <link href="~/Content/animate.min.css" rel="stylesheet" />
+    <link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.datetimepicker.full.js"></script>
+    <script src="~/Scripts/bootstrap-multiselect.js"></script>
+    <script src="~/Scripts/Common.js"></script>
+    <script src="~/Scripts/MvcGrid/mvc-grid.js"></script>
+    <script type="text/javascript">
+        rootUrl = "@Url.Content("~/")";
+        var ControllerName = "OrderProcessMeeting";
+        var ActionName = "OPMFilterSearch";
+        var tableList = "OPMList";
+        var tableName = "tblOPMGrid";//For Grid
+        var dvModel = "dvModel";
+        var frnName = "frmOPM";
+
+        //Add/Edit OPM Master
+        function AddEditOPM(OPM_ID = 0) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditOPM", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvOPMModel').html(data);
+                    $('#dvOPMModel').modal('show');
+
+                    formValidation_OPM();//Validation
+                    SetDatepicker_OPM();//Set Datepicker
+                    SetParticipant();
+                    SetBuyerReferenceName();
+                    $(".close_product_model").click(function () {
+                        $('#dvOPMModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_OPM() {
+            $("#frmOPM").validate({
+                rules: {
+                    "Table.BuyerReferenceName": "required",
+                    "Table.BuyerStoryName": "required",
+                    "Table.OID": "required",
+                    "Table.StartupLetterIssued": "required",
+                    "Table.Participants": "required",
+                    "Table.KrrMeetingHeldOn": "required",
+                    "Table.PackingList": "required",
+                    "Table.KarurDespatch": "required"
+                },
+                messages: {
+                    "Table.BuyerReferenceName": "",
+                    "Table.BuyerStoryName": "",
+                    "Table.OID": "",
+                    "Table.StartupLetterIssued": "",
+                    "Table.Participants": "",
+                    "Table.KrrMeetingHeldOn": "",
+                    "Table.PackingList": "",
+                    "Table.KarurDespatch": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_OPM(id) {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_OPM(tableHtml) {
+            $("#" + tableList).html(tableHtml);
+            $('#dvOPMModel').modal('hide');
+            bindGridEvent(tableName); //initialize grid functions
+
+            alert("OPM successfuly saved.");
+        }
+        function OnFailure(msg) {
+            if (msg.statusText == "exists") { alert("OPM Name already exists.");}
+        }
+        function DeleteOPM(OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteOPM", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "OPM_ID": OPM_ID, fieldName: setFieldName, sortOrder: setSortorder, 'StaticPageSize': 10 }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableList).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+        //Toggle Grid
+        function TogglePOMGrid($this, OPM_ID) {
+            var id = '.sub-grid-row-' + OPM_ID;
+            if ($(id).hasClass('hide')) {
+                $(id).removeClass('hide');
+                $('.prod-toggle-' + OPM_ID).find('i').removeAttr('class').addClass('glyphicon glyphicon-minus');
+                SetVendor(OPM_ID);
+            }
+            else {
+                $(id).addClass('hide');
+                $('.prod-toggle-' + OPM_ID).find('i').removeAttr('class').addClass('glyphicon glyphicon-plus');
+            }
+        }
+
+        //Muliselect Dropdown
+        function SetParticipant() {
+            $("#Participant").multiselect();
+        }
+
+        function SetBuyerReferenceName() {
+            $("#BuyerReferenceName").multiselect();
+        }
+
+        //Start Vendor
+        var ActionNameVendor = "VendorFilterSearch";
+        var tableListVendor = "VendorList-";
+        var tableNameVendor = "tblVendorGrid";//For Grid
+        //Fill Grid
+        function SetVendor(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("VendorFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListVendor + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit Vendor Master
+        function AddEditVendor(VP_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditVendor", "OrderProcessMeeting")",
+                data: JSON.stringify({ "VP_ID": VP_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvVendorModel').html(data);
+                    $('#dvVendorModel').modal('show');
+                    formValidation_Vendor();//Validation
+                    SetDatepicker_Vendor();
+                    $(".close_product_model").click(function () {
+                        $('#dvVendorModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_Vendor() {
+            $("#frmVendor").validate({
+                rules: {
+                    "Table.BuyerOrderNumber": "required",
+                    "Table.VendorName": "required",
+                    "Table.Process": "required",
+                    "Table.SPC1": "required",
+                    "Table.InChargeName": "required"
+                },
+                messages: {
+                    "Table.BuyerOrderNumber": "",
+                    "Table.VendorName": "",
+                    "Table.Process": "",
+                    "Table.SPC1": "",
+                    "Table.InChargeName": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_Vendor() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_Vendor(data) {
+            $("#" + tableListVendor + data.OPM_ID).html(data.viewData);
+            $('#dvVendorModel').modal('hide');
+            alert("Vendor successfuly saved.");
+        }
+
+        function OnFailureVendor(msg) {
+            if (msg.statusText == "exists") { alert("Vendor Name already exists.");}
+        }
+
+        function DeleteVendor(VP_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteVendor", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "VP_ID": VP_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListVendor + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End Vendor
+
+        //Start PKGKDList
+        var ActionNamePKGKDList = "PKGKDListFilterSearch";
+        var tableListPKGKDList = "PKGKDListList-";
+        var tableNamePKGKDList = "tblPKGKDListGrid";//For Grid
+        //Fill Grid
+        function SetPKGKDList(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("PKGKDListFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListPKGKDList + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit PKGKDList Master
+        function AddEditPKGKDList(PkgDesID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditPKGKDList", "OrderProcessMeeting")",
+                data: JSON.stringify({ "PkgDesID": PkgDesID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvPKGKDListModel').html(data);
+                    $('#dvPKGKDListModel').modal('show');
+                    formValidation_PKGKDList();//Validation
+                    SetDatepicker_PKGKDList();
+                    $(".close_product_model").click(function () {
+                        $('#dvPKGKDListModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_PKGKDList() {
+            $("#frmPKGKDList").validate({
+                rules: {
+                    "Table.BuyerOrderName": "required",
+                    "Table.OPMPKGListDate": "required",
+                    "Table.OPMKDListDate": "required"
+                },
+                messages: {
+                    "Table.BuyerOrderName": "",
+                    "Table.OPMPKGListDate": "",
+                    "Table.OPMKDListDate": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }        
+        function SetDatepicker_PKGKDList() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_PKGKDList(data) {
+            $("#" + tableListPKGKDList + data.OPM_ID).html(data.viewData);
+            $('#dvPKGKDListModel').modal('hide');
+            alert("PKGKDList successfuly saved.");
+        }
+
+        function OnFailurePKGKDList(msg) {
+            if (msg.statusText == "exists") { alert("PKGKDList Name already exists.");}
+        }
+
+        function DeletePKGKDList(PkgDesID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeletePKGKDList", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "PkgDesID": PkgDesID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListPKGKDList + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        function ChangeBuyerOrderNumberList($this) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetPINames", "OrderProcessMeeting")",
+                data: JSON.stringify({ "BuyerOrderNumber": $($this).val()}),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#Table_PINumber").val(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //End PKGKDList
+
+
+        //Start Style
+        var ActionNameStyle = "StyleFilterSearch";
+        var tableListStyle = "StyleList-";
+        var tableNameStyle = "tblStyleGrid";//For Grid
+        var divStylePopup = "dvStyleModel";
+        //Fill Grid
+        function SetStyle(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("StyleFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListStyle + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit Style Master
+        function AddEditStyle(Style_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditStyle", "OrderProcessMeeting")",
+                data: JSON.stringify({ "Style_ID": Style_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divStylePopup).html(data);
+                    $('#' + divStylePopup).modal('show');
+                    formValidation_Style();//Validation
+                    SetDatepicker_Style();
+                    $(".close_product_model").click(function () {
+                        $('#' + divStylePopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_Style() {
+            $("#frmStyle").validate({
+                rules: {
+                    "Table.PODescription": "required",
+                    "Table.AllPoIssuedDate": "required",
+                    "Table.MasterSwatches": "required",
+                    "Table.EngineeredDesignWeaving": "required",
+                    "Table.EngineeredDesignPrint": "required",
+                    "Table.EngineeredDesignSurface": "required",
+                    "Table.EngineeredDesignStitching": "required",
+                    "Table.SpecSheet": "required",
+                    "Table.QADate": "required",
+                    "Table.StyleSample": "required",
+                    "Table.Comments": "required"
+                },
+                messages: {
+                    "Table.PODescription": "",
+                    "Table.AllPoIssuedDate": "",
+                    "Table.MasterSwatches": "",
+                    "Table.EngineeredDesignWeaving": "",
+                    "Table.EngineeredDesignPrint": "",
+                    "Table.EngineeredDesignSurface": "",
+                    "Table.EngineeredDesignStitching": "",
+                    "Table.SpecSheet": "",
+                    "Table.QADate": "",
+                    "Table.StyleSample": "",
+                    "Table.Comments": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_Style() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_Style(data) {
+            $("#" + tableListStyle + data.OPM_ID).html(data.viewData);
+            $('#' + divStylePopup).modal('hide');
+            alert("Style successfuly saved.");
+        }
+
+        function OnFailureStyle(msg) {
+            if (msg.statusText == "exists") { alert("Style Name already exists.");}
+        }
+
+        function DeleteStyle(Style_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteStyle", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "Style_ID": Style_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListStyle + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End Style
+
+        //Start Takka
+        var ActionNameTakka = "TakkaFilterSearch";
+        var tableListTakka = "TakkaList-";
+        var tableNameTakka = "tblTakkaGrid";//For Grid
+        var divTakkaPopup = "dvTakkaModel";
+        //Fill Grid
+        function SetTakka(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("TakkaFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListTakka + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit Takka Master
+        function AddEditTakka(Takka_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditTakka", "OrderProcessMeeting")",
+                data: JSON.stringify({ "Takka_ID": Takka_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divTakkaPopup).html(data);
+                    $('#' + divTakkaPopup).modal('show');
+                    formValidation_Takka();//Validation
+                    SetDatepicker_Takka();
+                    $(".close_product_model").click(function () {
+                        $('#' + divTakkaPopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_Takka() {
+            $("#frmTakka").validate({
+                rules: {
+                    "Table.FirstTakka": "required",
+                    "Table.TotalNo": "required",
+                    "Table.Date": "required",
+                    "Table.TotalSKU": "required",
+                    "Table.SampleSubmission": "required",
+                    "Table.ReportReceipt": "required",
+                    "Table.ProductionSample": "required",
+                    "Table.CartonableLot": "required"
+                },
+                messages: {
+                    "Table.FirstTakka": "",
+                    "Table.TotalNo": "",
+                    "Table.Date": "",
+                    "Table.TotalSKU": "",
+                    "Table.SampleSubmission": "",
+                    "Table.ReportReceipt": "",
+                    "Table.ProductionSample": "",
+                    "Table.CartonableLot": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_Takka() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_Takka(data) {
+            $("#" + tableListTakka + data.OPM_ID).html(data.viewData);
+            $('#' + divTakkaPopup).modal('hide');
+            alert("Takka successfuly saved.");
+        }
+
+        function OnFailureTakka(msg) {
+            if (msg.statusText == "exists") { alert("Takka Name already exists.");}
+        }
+
+        function DeleteTakka(Takka_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteTakka", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "Takka_ID": Takka_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListTakka + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End Takka
+
+        //Start Target
+        var ActionNameTarget = "TargetFilterSearch";
+        var tableListTarget = "TargetList-";
+        var tableNameTarget = "tblTargetGrid";//For Grid
+        var divTargetPopup = "dvTargetModel";
+        //Fill Grid
+        function SetTarget(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("TargetFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListTarget + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit Target Master
+        function AddEditTarget(Target_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditTarget", "OrderProcessMeeting")",
+                data: JSON.stringify({ "Target_ID": Target_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divTargetPopup).html(data);
+                    $('#' + divTargetPopup).modal('show');
+                    formValidation_Target();//Validation
+                    SetDatepicker_Target();
+                    $(".close_product_model").click(function () {
+                        $('#' + divTargetPopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_Target() {
+            $("#frmTarget").validate({
+                rules: {
+                    "Table.SKUSheet": "required",
+                    "Table.OrderAccessories": "required",
+                    "Table.ReceiptAccessories": "required"
+                },
+                messages: {
+                    "Table.SKUSheet": "",
+                    "Table.OrderAccessories": "",
+                    "Table.ReceiptAccessories": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_Target() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_Target(data) {
+            $("#" + tableListTarget + data.OPM_ID).html(data.viewData);
+            $('#' + divTargetPopup).modal('hide');
+            alert("Target successfuly saved.");
+        }
+
+        function OnFailureTarget(msg) {
+            if (msg.statusText == "exists") { alert("Target Name already exists.");}
+        }
+
+        function DeleteTarget(Target_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteTarget", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "Target_ID": Target_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListTarget + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End Target
+
+        //Start QAInfo
+        var ActionNameQAInfo = "QAInfoFilterSearch";
+        var tableListQAInfo = "QAInfoList-";
+        var tableNameQAInfo = "tblQAInfoGrid";//For Grid
+        var divQAInfoPopup = "dvQAInfoModel";
+        //Fill Grid
+        function SetQAInfo(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("QAInfoFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListQAInfo + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit QAInfo Master
+        function AddEditQAInfo(QAInfo_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditQAInfo", "OrderProcessMeeting")",
+                data: JSON.stringify({ "QAInfo_ID": QAInfo_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divQAInfoPopup).html(data);
+                    $('#' + divQAInfoPopup).modal('show');
+                    formValidation_QAInfo();//Validation
+                    SetDatepicker_QAInfo();
+                    $(".close_product_model").click(function () {
+                        $('#' + divQAInfoPopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_QAInfo() {
+            $("#frmQAInfo").validate({
+                rules: {
+                    "Table.AgencyInspection": "required",
+                    "Table.SendRequestBeforeDay": "required",
+                    "Table.SendSampleForApproval": "required",
+                    "Table.SendSealerSample": "required"
+                },
+                messages: {
+                    "Table.AgencyInspection": "",
+                    "Table.SendRequestBeforeDay": "",
+                    "Table.SendSampleForApproval": "",
+                    "Table.SendSealerSample": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_QAInfo() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_QAInfo(data) {
+            $("#" + tableListQAInfo + data.OPM_ID).html(data.viewData);
+            $('#' + divQAInfoPopup).modal('hide');
+            alert("QAInfo successfuly saved.");
+        }
+
+        function OnFailureQAInfo(msg) {
+            if (msg.statusText == "exists") { alert("QAInfo Name already exists.");}
+        }
+
+        function DeleteQAInfo(QAInfo_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteQAInfo", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "QAInfo_ID": QAInfo_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListQAInfo + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End QAInfo
+
+        //Start QAInspection
+        var ActionNameQAInspection = "QAInspectionFilterSearch";
+        var tableListQAInspection = "QAInspectionList-";
+        var tableNameQAInspection = "tblQAInspectionGrid";//For Grid
+        var divQAInspectionPopup = "dvQAInspectionModel";
+        //Fill Grid
+        function SetQAInspection(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("QAInspectionFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListQAInspection + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit QAInspection Master
+        function AddEditQAInspection(QAIns_ID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditQAInspection", "OrderProcessMeeting")",
+                data: JSON.stringify({ "QAIns_ID": QAIns_ID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divQAInspectionPopup).html(data);
+                    $('#' + divQAInspectionPopup).modal('show');
+                    formValidation_QAInspection();//Validation
+                    SetDatepicker_QAInspection();
+                    $(".close_product_model").click(function () {
+                        $('#' + divQAInspectionPopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_QAInspection() {
+            $("#frmQAInspection").validate({
+                rules: {
+                    "Table.TypeOfInspection": "required",
+                    "Table.RequestDate1": "required",
+                    "Table.InspectionDate1": "required"
+
+                },
+                messages: {
+                    "Table.TypeOfInspection": "",
+                    "Table.RequestDate1": "",
+                    "Table.InspectionDate1": ""
+
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_QAInspection() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_QAInspection(data) {
+            $("#" + tableListQAInspection + data.OPM_ID).html(data.viewData);
+            $('#' + divQAInspectionPopup).modal('hide');
+            alert("QAInspection successfuly saved.");
+        }
+
+        function OnFailureQAInspection(msg) {
+            if (msg.statusText == "exists") { alert("QAInspection Name already exists.");}
+        }
+
+        function DeleteQAInspection(QAIns_ID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteQAInspection", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "QAIns_ID": QAIns_ID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListQAInspection + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+        //End QAInspection
+
+        //Start Product
+        var ActionNameProduct = "ProductFilterSearch";
+        var tableListProduct = "ProductList-";
+        var tableNameProduct = "tblProductGrid";//For Grid
+        var divProductPopup = "dvProductModel";
+        //Fill Grid
+        function SetProduct(OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ProductFilterSearch", "OrderProcessMeeting")",
+                data: JSON.stringify({ "OPM_ID": OPM_ID, }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#" + tableListProduct + OPM_ID).html(data);
+                },
+                error: function (ex) {}
+            });
+        }
+        //Add/Edit Product Master
+        function AddEditProduct(ProductID = 0, OPM_ID) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditProduct", "OrderProcessMeeting")",
+                data: JSON.stringify({ "ProductID": ProductID, "OPM_ID": OPM_ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#' + divProductPopup).html(data);
+                    $('#' + divProductPopup).modal('show');
+                    formValidation_Product();//Validation
+                    SetDatepicker_Product();
+                    $(".close_product_model").click(function () {
+                        $('#' + divProductPopup).modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_Product() {
+            $("#frmProduct").validate({
+                rules: {
+                    "Table.Productname": "required",
+                    "Table.Processname": "required",
+                    "Table.Suppliername": "required",
+                    "Table.Buyername": "required",
+                    "Table.BuyerOrderNumberName": "required",
+                    "Table.StartDate": "required",
+                    "Table.SPCDate": "required",
+                    "Table.ArticleNumber": "required",
+                    "Table.DesignNumber": "required",
+                    "Table.Size": "required",
+                    "Table.Colour": "required",
+                    "Table.CountConstruction": "required",
+                    "Table.Unit": "required",
+                    "Table.SetNote": "required"
+                },
+                messages: {
+                    "Table.Productname": "",
+                    "Table.Processname": "",
+                    "Table.Suppliername": "",
+                    "Table.Buyername": "",
+                    "Table.BuyerOrderNumberName": "",
+                    "Table.StartDate": "",
+                    "Table.SPCDate": "",
+                    "Table.ArticleNumber": "",
+                    "Table.DesignNumber": "",
+                    "Table.Size": "",
+                    "Table.Colour": "",
+                    "Table.CountConstruction": "",
+                    "Table.Unit": "",
+                    "Table.SetNote": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+        function SetDatepicker_Product() {
+            $(".datepicker").each(function () {
+                var id = $(this).attr("id");
+                $(this).datetimepicker({ format: 'Y-m-d', step: 30, timepicker: false });
+                if ($("#btn_" + id) != null) {
+                    $("#btn_" + id).click(function () {
+                        $('#' + id).datetimepicker('show');
+                    });
+                }
+            });
+        }
+
+        function SaveSuccess_Product(data) {
+            $("#" + tableListProduct + data.OPM_ID).html(data.viewData);
+            $('#' + divProductPopup).modal('hide');
+            alert("Product successfuly saved.");
+        }
+
+        function OnFailureProduct(msg) {
+            if (msg.statusText == "exists") { alert("Product Name already exists.");}
+        }
+
+        function DeleteProduct(ProductID, OPM_ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteProduct", "OrderProcessMeeting")",
+                    data: JSON.stringify({ "ProductID": ProductID, OPM_ID: OPM_ID }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableListProduct + OPM_ID).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+        function ChangeBuyerOrderNumberList($this) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetPIName", "OrderProcessMeeting")",
+                data: JSON.stringify({ "BuyerOrderNumber": $($this).val()}),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#Table_PINumber").val(data);
+                },
+                error: function (ex) {}
+            });
+        }
+
+        function ImportProduct(OPM_ID) {
+            $("#fileUpload").val("");
+            $("#Import_OPM_ID").val(OPM_ID);
+            $('#dvProductImportModel').modal('show');
+        }
+
+        function ImportProductClose() {
+            $("#Import_OPM_ID").val("");
+            $("#fileUpload").val("");
+            $('#dvProductImportModel').modal('hide');
+        }
+
+        function DownloadImportExcel() {
+            location.href = "@Url.Action("DownloadImportSample", "OrderProcessMeeting", new {  })";
+        }
+
+
+        function SaveImport() {
+            var myformdata = $("#frmProductImport").serialize();
+            var form = $('#frmProductImport')[0];
+            var data = new FormData(form);
+            var OPM_ID = $('#Import_OPM_ID').val();
+            $.ajax({
+                type: "POST",
+                enctype: 'multipart/form-data',
+                url: "@Url.Action("ProductImport", "OrderProcessMeeting")",
+                data: myformdata,
+                data: data,
+                processData: false,
+                contentType: false,
+                cache: false,
+                timeout: 600000,
+                success: function (data) {
+                    $("#" + tableListProduct + OPM_ID).html(data);
+                    ImportProductClose();
+                    alert("Import successfuly saved.");
+                }
+            });
+        }
+        //End Product
+    </script>
+    @*start Grid paging/Sorting*@
+    <script>
+        bindGridEvent(tableName);
+        FilterCondition("condition", ControllerName, ActionName, tableList, tableName);
+        function DropDownChange($this) {//grid header filter dropdown change
+            Search(ControllerName, ActionName, tableList, tableName);
+        }
+    </script>
+}

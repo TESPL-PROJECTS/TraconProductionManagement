@@ -1,0 +1,231 @@
+﻿@using ManageRoles.Repository
+@model OPM_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@using NonFactors.Mvc.Grid;
+@{
+    Layout = null;
+    int i = 0;
+    int count = Model.Filters.Count() + 2;
+    int id = Model.Table == null ? 0 : Model.Table.OPM_ID;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+
+<div class="table-responsive">
+    <table id="tblOPMGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|OPMFilterSearch|OPMList|tblOPMGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+
+                <th class="toggle">&nbsp;</th>
+                <th class="action">Action</th>
+                @foreach (var filter in Model.Filters)
+                {
+                    if (filter.ColumnName.ToLower() != "id")
+                    {
+
+                        <th class="@filter.ColumnName">
+
+                            @if (filter.ColumnName == "IsActive" || filter.ColumnName == "IsDefault")
+                            {
+                                @Html.Sorter(filter.ColumnName, filter.DisplayText, Model.dynamicListMetaData.TotalItemCount, "ProductGridFilterSearch", "Product", new AjaxOptions() { UpdateTargetId = "ProductGridList", OnSuccess = "bindGridEvent('tblProductGrid')", OnBegin = "beforePage" }, new { page = Model.dynamicListMetaData.PageNumber, sortOrder = filter.ColumnName == Model.fieldName ? Model.sortOrder : "" })
+                                <div class="input-group">
+                                    @Html.CustomCheckbox(filter.ColumnName, filter.Value == null ? "false" : filter.Value, new { @class = "group-checkable mg-rt-2", data_column = filter.ColumnName, data_condition = (string.IsNullOrEmpty(filter.Condition) ? "false" : filter.Condition) })
+                                    <a class="input-group-addon btn btn-icon-only @(string.IsNullOrEmpty(filter.Condition) ? "btn-filter" : "btn-red")" id="@Html.Raw("filter" + i)">
+                                        <i class="@(string.IsNullOrEmpty(filter.Condition) ? "glyphicon glyphicon-filter" : "glyphicon glyphicon-remove")"></i>
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.Sorter(filter.ColumnName, filter.DisplayText, Model.dynamicListMetaData.TotalItemCount, "ProductGridFilterSearch", "Product", new AjaxOptions() { UpdateTargetId = "ProductGridList", OnSuccess = "bindGridEvent('tblProductGrid')", OnBegin = "beforePage" }, new { page = Model.dynamicListMetaData.PageNumber, sortOrder = filter.ColumnName == Model.fieldName ? Model.sortOrder : "" })
+                                <div class="input-group">
+                                    <input type="text" class="form-control input-sm txt-filter" onabort="checkState(this)" data-pastvalue="@filter.Value" data-column="@filter.ColumnName" data-condition="@(string.IsNullOrEmpty(filter.Condition) ? "No" : filter.Condition)" value="@filter.Value" />
+                                    <a class="input-group-addon btn btn-icon-only  @(string.IsNullOrEmpty(filter.Condition) ? "btn-filter" : "btn-red") " id="@Html.Raw("filter" + i)">
+                                        <i class="@(string.IsNullOrEmpty(filter.Condition) ? "glyphicon glyphicon-filter" : "glyphicon glyphicon-remove")"></i>
+                                    </a>
+                                </div>
+                            }
+                        </th>
+                    }
+                    i++;
+                }
+            </tr>
+        </thead>
+        @if (Model != null && Model.dynamicList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.dynamicList)
+                {
+                    <tr class="prod-row-@item.OPM_ID">
+                        <td class="toggle">
+                            <a onclick="TogglePOMGrid(this,@item.OPM_ID);" class="cursor prod-toggle-@item.OPM_ID">
+                                <i class="glyphicon glyphicon-plus"></i>
+                            </a>
+                        </td>
+                        <td class="action">
+                            <button type="button" onclick="AddEditOPM(@item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteOPM(@item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        @foreach (var column in item)
+                        {
+                            string columnName = column.Key;
+                            string columnValue = column.Value == null ? string.Empty : Convert.ToString(column.Value);
+                            if (columnName.ToLower() != "id")
+                            {
+                                <td class="@columnName">
+                                    @if (columnName.ToLower() == "oid" || columnName.ToLower() == "startupletterissued" || columnName.ToLower() == "krrmeetingheldon" || columnName.ToLower() == "packinglist" || columnName.ToLower() == "karurdespatch")
+                                    {
+                                        columnValue = string.IsNullOrEmpty(columnValue) ? "" : Convert.ToDateTime(columnValue).ToString("dd-MMM-yy");
+                                        @Html.Raw(columnValue)
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(columnValue)
+                                    }
+                                </td>
+                            }
+                        }
+                    </tr>
+                    <tr class="prod-expand-row-@item.OPM_ID">
+                        <td colspan="15" class="sub-grid hide sub-grid-row-@item.OPM_ID">
+                            <div id="tab-row" data-opmid="@item.OPM_ID">
+                                <ul class="nav nav-tabs">
+                                    <li onclick="SetVendor(@item.OPM_ID)" class="active"><a data-toggle="tab" href="@Html.Raw("#Vendor"+item.OPM_ID)">Vendor Process</a></li>
+                                    <li onclick="SetStyle(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#Style"+item.OPM_ID)">Style Referance</a></li>
+                                    <li onclick="SetProduct(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#Product"+item.OPM_ID)">Product</a></li>
+                                    <li onclick="SetTarget(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#TargetDetail"+item.OPM_ID)">Target Details</a></li>
+                                    <li onclick="SetTakka(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#TakkaDetail"+item.OPM_ID)">Takka Details</a></li>
+                                    <li onclick="SetQAInfo(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#QAInformation"+item.OPM_ID)">QA Information</a></li>
+                                    <li onclick="SetQAInspection(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#QAInspection"+item.OPM_ID)">QA Inspection</a></li>
+                                    <li onclick="SetPKGKDList(@item.OPM_ID)"><a data-toggle="tab" href="@Html.Raw("#PKGKDList"+item.OPM_ID)">PKGKD List</a></li>                                    
+                                </ul>
+
+                                <div class="tab-content">
+                                    <div id="@Html.Raw("Vendor"+item.OPM_ID)" class="tab-pane fade in active">
+                                        <h3>Vendor</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditVendor(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add Vendor
+                                        </button>
+                                        <div id="VendorList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("Style"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>Style</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditStyle(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add Style
+                                        </button>
+                                        <div id="StyleList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("Product"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>Product</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditProduct(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add Product
+                                        </button>
+                                        <button id="btnImport" type="button" onclick="ImportProduct(@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-import"></i> Import Product
+                                        </button>
+                                        <button id="btnDownload" type="button" onclick="DownloadImportExcel();" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-download"></i> Download Sample
+                                        </button>
+                                        <div id="ProductList-@item.OPM_ID" class="divHScroll">
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("TargetDetail"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>TargetDetail</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditTarget(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add Target
+                                        </button>
+                                        <div id="TargetList-@item.OPM_ID" class="divHScroll">
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("TakkaDetail"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>Takka Details</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditTakka(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add Takka
+                                        </button>
+                                        <div id="TakkaList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("QAInformation"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>QA Information</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditQAInfo(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add QA Information
+                                        </button>
+                                        <div id="QAInfoList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("QAInspection"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>QA Inspection</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditQAInspection(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add QA Inspection
+                                        </button>
+                                        <div id="QAInspectionList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                    <div id="@Html.Raw("PKGKDList"+item.OPM_ID)" class="tab-pane fade">
+                                        <h3>PKGKDList</h3>
+                                        <button id="btnAdd" type="button" onclick="AddEditPKGKDList(0,@item.OPM_ID);" class="btnCRUD btn btn-sm btn-primary mr-bt-10">
+                                            <i class="glyphicon glyphicon-plus"></i> Add PKGKD List
+                                        </button>
+                                        <div id="PKGKDListList-@item.OPM_ID" class="divHScroll">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td colspan="9" class="sub-grid hide sub-grid-hide-row-@item.OPM_ID border-lt0">&nbsp;</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="@count">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.dynamicList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="@count">
+                        @{
+                            MVCPagerModel objMVCPagerModel = new MVCPagerModel();
+                            objMVCPagerModel.ActionName = "OPMFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "OPMList";
+                            objMVCPagerModel.TableUpdate = "tblOPMGrid";
+                            objMVCPagerModel.DynamicList = Model.dynamicList;
+                            objMVCPagerModel.DynamicListMetaData = Model.dynamicListMetaData;
+                            objMVCPagerModel.sortOrder = Model.sortOrder;
+                            objMVCPagerModel.fieldName = Model.fieldName;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                        }
+                        @Html.Partial("_MVCPager", objMVCPagerModel)
+                    </td>
+                </tr>
+                            }
+        </tfoot>
+    </table>
+</div>
+<script>
+    if (typeof SortSetting == 'function') {
+        SortSetting('@(Model.sortOrder == null ? "" : Model.sortOrder)', '@(Model.fieldName == null ? "" : Model.fieldName)');
+    }
+</script>
+
+
+
+

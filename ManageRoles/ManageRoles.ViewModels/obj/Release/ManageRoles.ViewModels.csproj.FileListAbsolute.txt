@@ -1,0 +1,12 @@
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\ManageRoles.ViewModels.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\ManageRoles.ViewModels.pdb
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\ManageRoles.Models.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\System.Web.Mvc.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\ManageRoles.Models.pdb
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\ManageRoles.Models.dll.config
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\bin\Release\System.Web.Mvc.xml
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\obj\Release\ManageRoles.ViewModels.csprojAssemblyReference.cache
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\obj\Release\ManageRoles.ViewModels.csproj.CoreCompileInputs.cache
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\obj\Release\ManageRoles.ViewModels.csproj.CopyComplete
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\obj\Release\ManageRoles.ViewModels.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.ViewModels\obj\Release\ManageRoles.ViewModels.pdb

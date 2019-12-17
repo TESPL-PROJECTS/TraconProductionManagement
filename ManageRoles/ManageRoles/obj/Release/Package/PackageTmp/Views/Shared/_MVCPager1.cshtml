@@ -1,0 +1,107 @@
+﻿@model ManageRoles.Repository.MVCPagerModel1
+@using PagedList.Mvc;
+@using ManageRoles.Helpers;
+@{
+    string onbegin = "beforePage";
+    string oncomplete = "bindGridEvent('" + Model.TableUpdate + "')";
+    string onsuccess = "";
+    if (Model.OnBegin != null)
+    {
+        onbegin = Model.OnBegin;
+    }
+    if (Model.OnComplete != null)
+    {
+        oncomplete = Model.OnComplete;
+    }
+    if (Model.OnComplete != null)
+    {
+        onsuccess = Model.OnSuccess;
+    }
+
+}
+
+<div class="fixed-table-pagination" style="display: block;">
+    <div class="pull-left">
+        @Html.PagedListPager(Model.pagedlist, page => Url.Action(Model.ActionName, Model.ControllerName,
+        new
+        {
+            page,
+            pageSize = Model.StaticPageSize,
+            OPM_ID = Model.OPM_ID
+        }),
+         //PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(new PagedListRenderOptions
+         //{
+         //    Display = PagedListDisplayMode.IfNeeded,
+         //    MaximumPageNumbersToDisplay = 5
+         //},
+         PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(new MyCustomRenderOptions(),
+        new AjaxOptions
+        {
+            HttpMethod = "POST",
+            UpdateTargetId = Model.UpdateTargetId,
+            OnBegin = onbegin,
+            OnComplete = oncomplete,
+            OnSuccess = onsuccess
+        }))
+    </div>
+    <div class="pull-left pagination-detail header-title">
+        <span class="pagination-info">
+            Records
+            Page @(Model.pagedlist.PageCount < Model.pagedlist.PageNumber ? 0 : Model.pagedlist.PageNumber) of @Model.pagedlist.PageCount
+        </span>
+        <span class="btn-group dropup">
+
+            <span class="pagination">
+                @Html.PagerDropdown(Model.StaticPageSize, Model.ActionName, Model.ControllerName, new AjaxOptions { HttpMethod = "POST", UpdateTargetId = Model.UpdateTargetId, OnBegin = onbegin, OnComplete = oncomplete, OnSuccess = onsuccess }, new { OPM_ID = Model.OPM_ID }, null, Model.StaticPageSize)
+                <input type="hidden" id="hdnoldPagesize" value="@Model.StaticPageSize" />
+            </span>
+
+        </span>
+        <span class="btn-group dropup">
+            items per page
+        </span>
+    </div>
+</div>
+
+
+@*@if (Model.pagedlist.TotalItemCount > 10)
+{
+    <div class="pagingBox">
+        <input id="HiddenPageSize" name="PageSize" type="hidden" />
+        <input id="HiddenPage" name="Page" type="hidden" />
+        <span class="selectBoxes display_none_mobile">
+            @Html.DropDownList("PageSize", new SelectList(new Dictionary<string, int> { { "10", 10 }, { "20", 20 } }, "Key", "Value", Convert.ToString(ViewBag.PageSize)), new { id = "pagesizelist" })
+        </span>
+        <div class="pagerecord display_none_mobile">
+            Records
+
+            Page @(Model.pagedlist.PageCount < Model.pagedlist.PageNumber ? 0 : Model.pagedlist.PageNumber) of Model.pagedlist.PageCount
+        </div>
+
+        @Html.PagedListPager(Model.pagedlist, page => Url.Action(Model.ActionName, Model.ControllerName,
+        new
+        {
+            page,
+            pageSize = Model.StaticPageSize
+        }),
+         //PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(new PagedListRenderOptions
+         //{
+         //    Display = PagedListDisplayMode.IfNeeded,
+         //    MaximumPageNumbersToDisplay = 5
+         //},
+         PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(new MyCustomRenderOptions(),
+        new AjaxOptions
+        {
+            HttpMethod = "POST",
+            UpdateTargetId = Model.UpdateTargetId,
+            OnBegin = onbegin,
+            OnComplete = oncomplete,
+            OnSuccess = onsuccess
+        }))
+    </div>
+}*@
+
+
+
+
+

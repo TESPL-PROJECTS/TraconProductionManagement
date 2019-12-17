@@ -1,0 +1,30 @@
+﻿body {
+    background-color: lightseagreen;
+}
+
+.navbar-default {
+    background-color: Highlight !important;
+    border-color: #e7e7e7;
+}
+
+    .navbar-default .sidebar {
+        background-color: lightseagreen !important;
+    }
+
+.nav > li > a {
+    color: #ffffff !important;
+}
+
+    .nav > li > a:focus, .nav > li > a:hover {
+        background-color: Highlight !important;
+        color: #ffffff !important;
+    }
+
+.sidebar ul li a.active {
+    background-color: Highlight !important;
+    color: #ffffff !important;
+}
+
+table .nav > li > a {
+    color: lightseagreen !important;
+}

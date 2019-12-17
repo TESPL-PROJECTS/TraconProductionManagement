@@ -1,0 +1,120 @@
+﻿@model ManageRoles.Repository.GroupBarModel
+@{
+    ViewBag.Title = "Index";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+<div class="row header-title">
+    <div class="title">Chart</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-6">
+        <label class="control-label1">Buyer Order Number</label>
+        @Html.DropDownList("BuyerOrderNumberName", Model.BuyerOrderNumberList, "[ALL]", new { @class = "form-control", onchange = "SetBar()" })
+    </div>
+</div>
+<div style="overflow:scroll; width:1300px;height:700px">
+    <div id="container" style="width:1300px;">
+        <canvas id="canvas"></canvas>
+    </div>
+</div>
+<script src="~/Scripts/Chart.min.js"></script>
+@section scripts {
+    <script>
+        function SetChartOption(pQty, fQty, bQty, categories) {
+            return {
+                labels: categories,
+                datasets: [
+                    {
+                        label: "Product Qty",
+                        backgroundColor: "pink",
+                        borderColor: "red",
+                        borderWidth: 1,
+                        data: pQty
+                    },
+                    {
+                        label: "Finished Qty",
+                        backgroundColor: "lightblue",
+                        borderColor: "blue",
+                        borderWidth: 1,
+                        data: fQty
+                    },
+                    {
+                        label: "Balance Qty",
+                        backgroundColor: "lightgreen",
+                        borderColor: "green",
+                        borderWidth: 1,
+                        data: bQty
+                    }
+                ]
+            };
+        }
+        var chartOptions = {
+            responsive: true,
+            legend: {
+                position: "top"
+            },
+            title: {
+                display: true,
+                text: "Bar Chart"
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+
+        window.onload = function () {
+            var barChartData = SetChartOption(@Html.Raw(Model.ProductQty),@Html.Raw(Model.FinishedQty),@Html.Raw(Model.BalanceQty),@Html.Raw(Model.categories))
+            var ctx = document.getElementById("canvas").getContext("2d");
+            window.myBar = new Chart(ctx, {
+                type: "bar",
+                data: barChartData,
+                options: chartOptions
+            });
+        };
+
+        function SetBar() {
+            var BuyerOrderNumberName = $("#BuyerOrderNumberName").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ResetBar", "Chart")",
+                data: JSON.stringify({ "BuyerOrderNumberName": BuyerOrderNumberName }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.Error) {
+                        alert("No Data Found");
+                    }
+                    else {
+                        window.myBar.destroy();
+                        var barChartData = SetChartOption(data.ProductQty, data.FinishedQty, data.BalanceQty, data.Categories);
+                        var ctx = document.getElementById("canvas").getContext("2d");
+                        window.myBar = new Chart(ctx, {
+                            type: "bar",
+                            data: barChartData,
+                            options: chartOptions
+                        });
+                    }
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+    }
+    </script>
+}

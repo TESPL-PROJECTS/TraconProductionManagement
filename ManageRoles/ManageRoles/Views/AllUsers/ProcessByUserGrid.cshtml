@@ -1,0 +1,124 @@
+﻿@using ManageRoles.Repository
+@using ManageRoles.Helpers
+@model ProcessByUser_Model
+@{
+    ViewBag.Title = "ProcessByUserGrid";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+}
+@Html.Partial("_FilterMenu")
+
+<div class="row header-title">
+    <div class="title">Process By User</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-6 pd-0 btnmrg">
+        <button id="btnAdd" type="button" onclick="AddEditProcessByUser();" class="btnCRUD btn btn-sm btn-primary">
+            <i class="glyphicon glyphicon-plus"></i> Add ProcessByUser
+        </button>
+    </div>
+    <div class="col-md-6 font-14">
+        <div id="lblmsg"></div>
+    </div>
+</div>
+
+<div class="row" id="ProcessByUserList">
+    @Html.Partial("ProcessByUserList", Model)
+</div>
+
+@* Add model after main div where model used in main div for CRUD Operation model for getting tablelist id *@
+<div id="dvProcessByUserModel" class="modal fadeInDown animated draggable-modal modal-scroll" tabindex="-1" data-backdrop="static" data-keyboard="false"></div>
+<link href="~/Content/bootstrap-multiselect.css" rel="stylesheet" />
+@section scripts{
+    <link href="~/Content/CommonGrid.css" rel="stylesheet" />
+    <link href="~/Content/animate.min.css" rel="stylesheet" />
+    <link href="~/Content/jquery.datetimepicker.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.datetimepicker.full.js"></script>
+    <script src="~/Scripts/bootstrap-multiselect.js"></script>
+    <script src="~/Scripts/Common.js"></script>
+    <script type="text/javascript">
+        rootUrl = "@Url.Content("~/")";
+        var ControllerName = "AllUsers";
+        var ActionName = "ProcessByUserFilterSearch";
+        var tableList = "ProcessByUserList";
+        var tableName = "tblProcessByUserGrid";//For Grid
+        var dvModel = "dvModel";
+        var frnName = "frmProcessByUser";
+
+        //Add/Edit ProcessByUser Master
+        function AddEditProcessByUser(ID = 0) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddEditProcessByUser", "AllUsers")",
+                data: JSON.stringify({ "ID": ID }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#dvProcessByUserModel').html(data);
+                    $('#dvProcessByUserModel').modal('show');
+
+                    formValidation_ProcessByUser();//Validation
+                    SetProcess();
+                    $(".close_product_model").click(function () {
+                        $('#dvProcessByUserModel').modal('hide');
+                    });
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+        function formValidation_ProcessByUser() {
+            $("#frmProcessByUser").validate({
+                rules: {
+                    "UserId": "required",
+                    "ProcessId": "required"
+                },
+                messages: {
+                    "UserId": "",
+                    "ProcessId": ""
+                },
+                errorElement: "div",
+                errorClass: "has-error help-inline"
+            });
+        }
+
+        function SaveSuccess_ProcessByUser(tableHtml) {
+            $("#" + tableList).html(tableHtml);
+            $('#dvProcessByUserModel').modal('hide');
+            bindGridEvent(tableName); //initialize grid functions
+            alert("ProcessByUser successfuly saved.");
+        }
+        function OnFailure(msg) {
+            if (msg.statusText == "exists") { alert("ProcessByUser Name already exists.");}
+        }
+        function DeleteProcessByUser(ID){
+            if (confirm("Are you sure want delete selected items ?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteProcessByUser", "AllUsers")",
+                    data: JSON.stringify({ "ID": ID, fieldName: setFieldName, sortOrder: setSortorder, 'StaticPageSize': 10 }),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#" + tableList).html(data);
+                    },
+                    error: function (ex) {}
+                });
+            }
+        }
+
+        //Muliselect Dropdown
+        function SetProcess() {
+            $("#ProcessId").multiselect();
+        }
+        
+    </script>
+    @*start Grid paging/Sorting*@
+    <script>
+        bindGridEvent(tableName);
+        FilterCondition("condition", ControllerName, ActionName, tableList, tableName);
+        function DropDownChange($this) {//grid header filter dropdown change
+            Search(ControllerName, ActionName, tableList, tableName);
+        }
+    </script>
+}

@@ -1,0 +1,116 @@
+﻿@using ManageRoles.Repository
+@model Style_Model
+
+@{
+    Layout = null;
+}
+
+@using (Ajax.BeginForm("SaveStyle", "OrderProcessMeeting", "", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "SaveSuccess_Style", OnFailure = "OnFailureStyle" }, new { id = "frmStyle", data_tablename = "tblStyleGrid" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title">
+                    @if (Model.Table.Style_ID > 0)
+                    {@Html.Raw("Update Style") }
+                else
+                { @Html.Raw("Add Style")}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <!-- BEGIN FORM-->
+                <div class="form-horizontal1">
+                    <div class="form-body">
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Style ID</label>
+                            @Html.HiddenFor(d => d.Table.OPM_ID)
+                            @Html.TextBoxFor(d => d.Table.Style_ID, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">All Po's will be issued on or before</label>
+                            <div class="input-group">
+                                @{
+                                    var dt = "";
+                                    if (Model.Table != null && Model.Table.AllPoIssuedDate != null)
+                                    {
+                                        dt = Model.Table.AllPoIssuedDate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.AllPoIssuedDate, String.Format("{0:d}", dt), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_AllPoIssuedDate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">No of Master Swatches for Design/Quality/Colour </label>
+                            @Html.TextBoxFor(m => m.Table.MasterSwatches, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Engineered Designs Weaving</label>
+                            @Html.TextBoxFor(m => m.Table.EngineeredDesignWeaving, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Engineered Designs Print </label>
+                            @Html.TextBoxFor(m => m.Table.EngineeredDesignPrint, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Engineered Designs Surface Work </label>
+                            @Html.TextBoxFor(m => m.Table.EngineeredDesignSurface, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Engineered Designs Stitching </label>
+                            @Html.TextBoxFor(m => m.Table.EngineeredDesignStitching, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Spec Sheet -Total SKU's </label>
+                            @Html.TextBoxFor(m => m.Table.SpecSheet, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">OPS Handover to QA Date </label>
+                            <div class="input-group">
+                                @{
+                                    var spcdate = "";
+                                    if (Model.Table != null && Model.Table.QADate != null)
+                                    {
+                                        spcdate = Model.Table.QADate.Value.ToString("yyyy-MM-dd");
+                                    }
+                                }
+                                @Html.TextBoxFor(m => m.Table.QADate, String.Format("{0:d}", spcdate), new { @class = "form-control datepicker input-inline input-medium" })
+
+                                <a id="btn_Table_QADate" class="ui-datepicker-trigger input-group-addon btn">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">If any style sample required - Total SKU's </label>
+                            @Html.TextBoxFor(m => m.Table.StyleSample, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="control-label1">Any new/critical items/quality issues - Comments from Samp / Prodn </label>
+                            @Html.TextBoxFor(m => m.Table.Comments, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-check"></i> Submit</button>
+                        <button type="button" class="btn btn-danger close_product_model"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
+                    </div>
+                </div>
+                <!-- END FORM-->
+            </div>
+        </div>
+    </div>
+                                    }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

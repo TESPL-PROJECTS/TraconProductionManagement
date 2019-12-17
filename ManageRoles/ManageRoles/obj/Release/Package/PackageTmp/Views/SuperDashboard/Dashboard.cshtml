@@ -1,0 +1,205 @@
+﻿@model ManageRoles.Repository.DashboardModel
+@{
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    List<Tuple<string, string>> lstUser = new List<Tuple<string, string>>();
+    if (ViewBag.OnlineUser != null)
+    {
+        lstUser = (List<Tuple<string, string>>)ViewBag.OnlineUser;
+    }
+}
+<style>
+    tbody {
+        display: block;
+        height: 200px;
+        overflow: auto;
+    }
+
+    thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        color: darkblue;
+    }
+
+    tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    thead {
+        width: calc( 100% - 1em )
+    }
+
+    .media-object {
+        height: 32px !important;
+    }
+
+    .pane-hScroll {
+        overflow: auto;
+        width: 1200px;
+    }
+
+    .login-form-title {
+        font-family: Century Gothic;
+        font-size: 18px;
+        line-height: 1.2;
+        text-align: center;
+        display: block;
+        margin-top: 25px;
+    }
+</style>
+<link href="~/Content/bootstrap-select.min.css" rel="stylesheet" />
+<span class="login-form-title">
+    <img alt="Web Studio" style="width:185px" class="img-fluid" src="~/Content/Image/Tracon Logo Main  Page.png" />
+    Tracon Export Services Private Limited - Head Office: Mumbai, Factory : Karur, Showroom : Grurugram
+</span>
+<div class="row header-title">
+    <div class="title"></div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row" style="margin:10px">
+    <div class="col-md-6">
+        <h4>The Below Said Orders Packing List are Closer to the Days</h4>
+        @Html.Partial("BuyerOrderPackingList", Model.LstBuyerOrderPackingList)
+    </div>
+    <div class="col-md-6">
+        <h4>The Below Said Orders Despatches are Closer to the Days</h4>
+        @Html.Partial("BuyerOrderDespatchList", Model.LstBuyerOrderDespatchList)
+    </div>
+</div>
+@*<div class="row" style="margin:10px">
+        <div class="col-md-6">
+            <h4>The Below Said Orders In-Line Inspection are Closer to the Days</h4>
+            @Html.Partial("InLineInspectionList", Model.LstInLineInspection)
+        </div>
+        <div class="col-md-6">
+            <h4>The Below Said Orders Mid-Line Inspection are Closer to the Days</h4>
+            @Html.Partial("MidLineInspectionList", Model.LstMidLineInspection)
+        </div>
+    </div>*@
+<div class="row" style="margin:10px">
+    @*<div class="col-md-6">
+            <div class="col-md-7">
+                <h4>Chart</h4>
+                <div id="chart">
+                </div>
+            </div>
+            <div class="col-md-5">
+                <select title="Users" id="selectpicker123" data-width="150px">
+                    @foreach (var objUser in lstUser)
+                    {
+                        string imgPath = Url.Content("~/Content/UserImage/man-user.png");
+                        if (!string.IsNullOrEmpty(objUser.Item2))
+                        {
+                            imgPath = Url.Content("~/Content/UserImage/" + objUser.Item2.ToString());
+                        }
+                        <option data-thumbnail="@imgPath">@(!string.IsNullOrEmpty(objUser.Item1) ? objUser.Item1 : "")</option>
+                    }
+                </select>
+            </div>
+        </div>*@
+    <div class="col-md-4">
+        <h4>The Below Said Orders Products are Remaining to the Days</h4>
+        <div class="row">
+            <div class="col-md-4">
+                @Html.DropDownListFor(d => d.BuyerList, Model.BuyerList, "[None]", new { @class = "form-control", onchange = "ChangeDSProductFilter()" })
+            </div>
+            <div class="col-md-4">
+                @Html.DropDownListFor(d => d.BuyerOrderNumberList, Model.BuyerOrderNumberList, "[None]", new { @class = "form-control", onchange = "ChangeDSProductFilter()" })
+            </div>
+            <div class="col-md-4">
+                @Html.DropDownListFor(d => d.ProcessList, Model.ProcessList, "[None]", new { @class = "form-control", onchange = "ChangeDSProductFilter()" })
+            </div>
+        </div>
+        <div id="divDSProductList" class="pane-hScroll">
+            @Html.Partial("DSProductList", Model.LstDSProductUpdateGrid)
+        </div>
+    </div>
+    @*<div class="col-md-6">
+            <h4>The Below Said Orders Final-Inspection are Closer to the Days</h4>
+            @Html.Partial("FinalLineInspectionList", Model.LstFinalLineInspection)
+        </div>
+        <div class="col-md-6">
+            <h4>Chart</h4>
+            <div id="chart">
+            </div>
+        </div>*@
+</div>
+@section scripts {
+    <script src="~/Content/apexcharts/apexcharts.js"></script>
+    <script src="~/Scripts/bootstrap-select.js"></script>
+    <script>
+    function SetChartOption(series, categories) {
+        return options = {
+            chart: {
+                width: 250,
+                type: 'pie',
+            },
+            labels: categories,
+            series: series,
+            fill: {
+                type: 'gradient',
+            },
+            legend: {
+                position: 'bottom',
+                formatter: function (val, opts) {
+                    return val + " - " + opts.w.globals.series[opts.seriesIndex]
+                }
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    }
+    var chart;
+    $(document).ready(function () {
+        var series = @Html.Raw(Model.series);
+        var categories = @Html.Raw(Model.labels);
+        var options = SetChartOption(series, categories);
+        chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+        $('#selectpicker123').selectpicker();
+    });
+
+
+        function ChangeDSProductFilter() {
+        var buyername = $("#BuyerList").val();
+        var orderNo = $("#BuyerOrderNumberList").val();
+        var processNM = $("#ProcessList").val();
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DSProductFilterSearch", "Home")",
+            data: JSON.stringify({ "buyername": buyername, "orderNo": orderNo, "processName": processNM}),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#divDSProductList").html(data);
+            },
+            error: function (ex) {
+                alert(ex);
+            }
+        });
+    }
+    </script>
+}

@@ -1,0 +1,42 @@
+﻿@using ManageRoles.Repository
+@model List<ManageRoles.Models.VW_FinalLineInspectionList>
+@{
+    Layout = null;
+}
+
+<div class="table-responsive">
+    <table id="tblFIL" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                <th class="action">Buyer Order Number</th>
+                <th class="action">FinalLine Inspection Date</th>
+                <th class="action">Today Date</th>
+                <th class="action">Remaining Days</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.BuyerOrderNumberName</td>
+                        <td>@(item.FinalLineInspection != null ? Convert.ToDateTime(item.FinalLineInspection).ToString("dd-MMM-yy") : "")</td>
+                        <td>@(item.TodayDate != null ? Convert.ToDateTime(item.TodayDate).ToString("dd-MMM-yy") : "")</td>
+                        <td>@item.RemainingDays</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+    </table>
+</div>

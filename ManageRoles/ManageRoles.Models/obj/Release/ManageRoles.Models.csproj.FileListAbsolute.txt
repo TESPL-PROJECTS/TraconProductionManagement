@@ -1,0 +1,10 @@
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\bin\Release\ManageRoles.Models.dll.config
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\bin\Release\ManageRoles.Models.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\bin\Release\ManageRoles.Models.pdb
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\bin\Release\System.Web.Mvc.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\bin\Release\System.Web.Mvc.xml
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\obj\Release\ManageRoles.Models.csprojAssemblyReference.cache
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\obj\Release\ManageRoles.Models.csproj.CoreCompileInputs.cache
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\obj\Release\ManageRoles.Models.csproj.CopyComplete
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\obj\Release\ManageRoles.Models.dll
+D:\TRACON_SYSTEM_MVC_FINAL_2020\ManageRoles\ManageRoles.Models\obj\Release\ManageRoles.Models.pdb

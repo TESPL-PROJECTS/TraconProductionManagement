@@ -1,0 +1,155 @@
+﻿@model ManageRoles.ViewModels.CreateUserViewModel
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    bool isImage = false;
+    if (Model.ImageName != null && !string.IsNullOrEmpty(Model.ImageName))
+    {
+        isImage = true;
+    }
+}
+
+<h4 class="page-header">Create User</h4>
+<div class="panel panel-default">
+    <div class="panel-heading">Create User</div>
+    <div class="panel-body">
+        @if (TempData["MessageCreateUsers"] != null)
+            {
+            <div class="alert alert-danger alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Message!</strong> @TempData["MessageCreateUsers"]
+            </div>
+        }
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @using (Html.BeginForm("Create", "CreateUsers", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(c => c.UserId)
+            <div class="row">
+                <div class="col-lg-4">
+                    @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label manadatory" })
+                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @maxlength = 40, @onkeypress = "return onlyspecchar(event);" })
+                    @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-lg-4">
+                    @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label manadatory" })
+                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-lg-4">
+                    @Html.LabelFor(model => model.EmailId, htmlAttributes: new { @class = "control-label manadatory" })
+                    @Html.TextBoxFor(model => model.EmailId, new { @class = "form-control", @maxlength = 50 })
+                    @Html.ValidationMessageFor(model => model.EmailId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="clearfix"></div>
+                <div class="col-lg-4" style="margin-top:20px;">
+                    @Html.LabelFor(model => model.Gender, htmlAttributes: new { @class = "control-label manadatory" })
+                    @Html.RadioButtonFor(model => model.Gender, "M") @Html.Label("", "Male")
+                    @Html.RadioButtonFor(model => model.Gender, "F") @Html.Label("", "Female")
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-lg-4">
+                    @Html.LabelFor(model => model.MobileNo, htmlAttributes: new { @class = "control-label" })
+                    @Html.TextBoxFor(model => model.MobileNo, new { @class = "form-control", @maxlength = 10 })
+                    @Html.ValidationMessageFor(model => model.MobileNo, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-lg-4">
+                </div>
+            </div>
+            if (Model.UserId <= 0)
+            {
+                <div class="row">
+                    <div class="col-lg-4">
+                        @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label manadatory" })
+                        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @maxlength = 20, @onkeypress = "return onlyspecchar(event);" })
+                        @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-lg-4">
+                        @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label manadatory" })
+                        @Html.PasswordFor(model => model.Password, new { @class = "form-control", @maxlength = 30, @autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-lg-4">
+                        @Html.LabelFor(model => model.ConfirmPassword, htmlAttributes: new { @class = "control-label manadatory" })
+                        @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "form-control", @autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-lg-4">
+                        @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label manadatory" })
+                        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @maxlength = 20, @readonly= "readonly", @onkeypress = "return onlyspecchar(event);" })
+                        @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            }
+            if (Model.UserId <= 0)
+            {
+                <div class="row">
+                    <div class="col-lg-4">
+                        @Html.LabelFor(model => model.RoleId, htmlAttributes: new { @class = "control-label manadatory" })
+                        @Html.DropDownListFor(model => model.RoleId, new SelectList(Model.ListRole, "RoleId", "RoleName"), new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.RoleId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="file" name="fileUpload" id="fileUpload" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div id="divUpload" style="@(isImage ? "display:none" : "")">
+                            <label class="control-label manadatory"></label>
+                            <input type="file" name="fileUpload" id="fileUpload" />
+                        </div>
+                        <div id="divUploadImage" class="col-sm-12" style="@(isImage ? "" : "display:none")">
+                            <div><img src="~/\Content/UserImage/@(Model.ImageName)" class="img-rounded" alt="@Model.ImageName" style="width: 200px;height: 200px;" /></div>
+                            <div><i class="fa fa-trash-o" onclick="DeleteImage('@(Model.UserId)','@(Model.ImageName)')"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+            }
+            <br />
+            <div class="row">
+                <div class="col-lg-4">
+                    <input type="submit" value="Create User" class="btn btn-success" />
+                    @Html.ActionLink("Clear", "Create", "CreateUsers", null, new { @class = "btn btn-danger" })
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@section scripts {
+    <script>
+    var deleteImageAction = "@Url.Action("UserImageDelete", "CreateUsers")";
+    function DeleteImage(userId, fileName) {
+        $.ajax({
+            type: "POST",
+            url: deleteImageAction,
+            data: JSON.stringify({ userId: userId, fileName: fileName }),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (!data) {
+                    alert("Issue on delete");
+                }
+                else {
+                    $("#hdnPhoto").val("");
+                    $("#divUpload").show();
+                    $("#divUploadImage").hide();
+                }
+            }
+        });
+    }
+    </script>
+}

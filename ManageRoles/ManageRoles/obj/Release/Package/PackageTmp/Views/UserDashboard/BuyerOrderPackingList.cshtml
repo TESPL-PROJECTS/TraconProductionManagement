@@ -1,0 +1,48 @@
+﻿@using ManageRoles.Repository
+@model List<ManageRoles.Models.VW_BuyerOrderPackingList>
+@{
+    Layout = null;
+}
+
+<div class="table-responsive">
+    <table id="tblQPKGL" class="main-grid table table-striped table-bordered table-hover1 tableFixHead">
+        <thead>
+            <tr class="header-title">
+                <th class="action">Buyer Order Number</th>
+                <th class="action">OPMPL Date</th>
+                <th class="action">BuyerPL Date</th>
+                <th class="action">Remaining Days For PL - OPM</th>
+                <th class="action">Remaining Days For PL - BYR</th>
+                <th class="action">Today Date</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td>@item.BuyerOrderName</td>
+                    <td>@(item.OPMPKGListDate != null ? Convert.ToDateTime(item.OPMPKGListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@(item.BuyerPKGListDate != null ? Convert.ToDateTime(item.BuyerPKGListDate).ToString("dd-MMM-yy") : "")</td>
+                    <td>@item.RemainingDays</td>
+                    <td>@item.BuyerRemainingDays</td>
+                    <td>@(item.TodayDate != null ? Convert.ToDateTime(item.TodayDate).ToString("dd-MMM-yy") : "")</td>
+                </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+    </table>
+</div>
+
+

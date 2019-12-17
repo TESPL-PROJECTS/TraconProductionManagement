@@ -1,0 +1,86 @@
+﻿@using ManageRoles.Repository
+@model Style_Model
+@using PagedList.Mvc
+@using ManageRoles.Helpers
+@{
+    Layout = null;
+    int id = Model.Table == null ? 0 : Model.Table.Style_ID;
+    var pagedlist = (PagedList.IPagedList)Model.pageList;
+}
+@Html.Hidden("hdnRowupdateIndex", id) @*for row highlight after update*@
+<div class="table-responsive">
+    <table id="tblStyleGrid" class="main-grid table table-striped table-bordered table-hover1">
+        <thead>
+            <tr class="header-title">
+                @Html.Hidden("hdnParamNames", "OrderProcessMeeting|StyleFilterSearch|StyleList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString()) + "|tblStyleGrid")@*Ex:  ControllerName|ActionName|tableList|tableName*@
+                <th class="action">Action</th>
+                <th class="action">Style_ID</th>
+                <th class="action">issued on or before</th>
+                <th class="action">No of Master Swatches</th>
+                <th class="action">Weaving</th>
+                <th class="action">Print</th>
+                <th class="action">Surface Work</th>
+                <th class="action">Stitching</th>
+                <th class="action">Spec Sheet</th>
+                <th class="action">QA Date</th>
+                <th class="action">Style Samples</th>
+                <th class="action">Comments</th>
+            </tr>
+        </thead>
+        @if (Model != null && Model.StyleList.Count() > 0)
+        {
+            <tbody>
+                @foreach (var item in Model.StyleList)
+                {
+                    <tr class="style-row-@item.Style_ID">
+                        <td class="action">
+                            <button type="button" onclick="AddEditStyle(@item.Style_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-info">Edit</button>
+                            <button type="button" onclick="DeleteStyle(@item.Style_ID, @item.OPM_ID);" class="btnCRUD btn btn-xs btn-danger">Delete</button>
+                        </td>
+                        <td>@item.Style_ID</td>
+                        <td>@(item.AllPoIssuedDate != null ? Convert.ToDateTime(item.AllPoIssuedDate).ToString("dd-MMM-yy") : "")</td>
+                        <td>@item.MasterSwatches</td>
+                        <td>@item.EngineeredDesignWeaving</td>
+                        <td>@item.EngineeredDesignPrint</td>
+                        <td>@item.EngineeredDesignSurface</td>
+                        <td>@item.EngineeredDesignStitching</td>
+                        <td>@item.SpecSheet</td>
+                        <td>@(item.QADate != null ? Convert.ToDateTime(item.QADate).ToString("dd-MMM-yy") : "")</td>
+                        <td>@item.StyleSample</td>
+                        <td>@item.Comments</td>
+                    </tr>
+                }
+            </tbody>
+        }
+        else
+        {
+            <tbody>
+                <tr>
+                    <td colspan="8">
+                        No data
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tfoot>
+            @if (Model != null && Model.pageList.Count() != 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        @{
+                            MVCPagerModel1 objMVCPagerModel = new MVCPagerModel1();
+                            objMVCPagerModel.ActionName = "StyleFilterSearch";
+                            objMVCPagerModel.ControllerName = "OrderProcessMeeting";
+                            objMVCPagerModel.UpdateTargetId = "StyleList" + (Model.OPM_ID == 0 ? "" : "-" + Model.OPM_ID.ToString());
+                            objMVCPagerModel.TableUpdate = "tblStyleGrid";
+                            objMVCPagerModel.pagedlist = pagedlist;
+                            objMVCPagerModel.StaticPageSize = Model.StaticPageSize;
+                            objMVCPagerModel.OPM_ID = Model.OPM_ID;
+                        }
+                        @Html.Partial("_MVCPager1", objMVCPagerModel)
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+</div>

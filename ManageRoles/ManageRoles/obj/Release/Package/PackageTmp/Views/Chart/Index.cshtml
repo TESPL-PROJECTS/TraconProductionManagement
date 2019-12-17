@@ -1,0 +1,219 @@
+﻿@model ManageRoles.Repository.VW_ProductSummary_Model
+@{
+    ViewBag.Title = "Index";
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "SuperAdmin")
+    {
+        Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "User")
+    {
+        Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    }
+    if (Session["RoleName"] != null && Session["RoleName"].ToString() == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+<link href="~/Content/apexcharts/apexcharts.css" rel="stylesheet" />
+<div class="row header-title">
+    <div class="title">Chart</div>
+    <hr class="hr-tp-0" />
+</div>
+
+<div class="row pd-bt-10">
+    <div class="col-md-3">
+        <label class="control-label1">Process Name</label>
+        @Html.DropDownListFor(d => d.ProcessName, Model.ProcessList, "[ALL]", new { @class = "form-control", onchange = "SetChart()" })
+    </div>
+    <div class="col-md-3">
+        <label class="control-label1">Buyer Order Number</label>
+        @Html.DropDownListFor(d => d.BuyerOrderNumberName, Model.BuyerOrderNumberList, "[ALL]", new { @class = "form-control", onchange = "SetChart()" })
+    </div>
+
+
+    <div class="col-md-6">
+    </div>
+</div>
+<div class="row">
+    <div style="overflow:scroll; width:700px;height:400px">
+        <div id="chart" style="width:800px;">
+        </div>
+    </div>
+</div>
+@*<div class="row" id="chart1">
+    </div>*@
+<script src="~/Content/apexcharts/apexcharts.js"></script>
+@section scripts {
+    <script>
+    function SetChartOption(series, categories) {
+        return options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                stacked: true,
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                },
+
+            },
+            stroke: {
+                width: 1,
+                colors: ['#fff']
+            },
+            series: series,
+            title: {
+                text: 'Chart'
+            },
+            xaxis: {
+                categories: categories,
+                labels: {
+                    formatter: function (val) {
+                        return val + "K"
+                    }
+                }
+            },
+            yaxis: {
+                title: {
+                    text: undefined
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val + "K"
+                    }
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'left',
+                offsetX: 40
+            }
+        }
+    }
+    var chart;
+    $(document).ready(function () {
+        var series = @Html.Raw(Model.Json);
+        var categories = @Html.Raw(Model.categories);
+        var options = SetChartOption(series, categories);
+        chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    });
+
+    function SetChart() {
+        var ProcessName = $("#ProcessName").val();
+        var BuyerOrderNumberName = $("#BuyerOrderNumberName").val();
+        if ((ProcessName != "" && BuyerOrderNumberName != "") || (ProcessName == "" && BuyerOrderNumberName == "")){
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("ResetChart", "Chart")",
+                data: JSON.stringify({ "pName": ProcessName, "oNumber": BuyerOrderNumberName }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.Error) {
+                        alert("No Data Found");
+                    }
+                    else{
+                        var series = data.Series;
+                        var categories = data.Categories;
+                        var options = SetChartOption(series, categories);
+                        chart.updateOptions(options);
+                    }
+                },
+                error: function (ex) {
+                    console.log(ex);
+                }
+            });
+        }
+    }
+
+    //var options1 = {
+    //    chart: {
+    //        height: 350,
+    //        type: 'bar',
+    //        stacked: true,
+    //    },
+    //    plotOptions: {
+    //        bar: {
+    //            horizontal: true,
+    //        },
+
+    //    },
+    //    stroke: {
+    //        width: 1,
+    //        colors: ['#fff']
+    //    },
+    //    series: [{
+    //        name: 'Marine Sprite',
+    //        data: [44, 55, 41, 37, 22, 43, 21]
+    //    }, {
+    //        name: 'Striking Calf',
+    //        data: [53, 32, 33, 52, 13, 43, 32]
+    //    }, {
+    //        name: 'Tank Picture',
+    //        data: [12, 17, 11, 9, 15, 11, 20]
+    //    }, {
+    //        name: 'Bucket Slope',
+    //        data: [9, 7, 5, 8, 6, 9, 4]
+    //    }, {
+    //        name: 'Reborn Kid',
+    //        data: [25, 12, 19, 32, 25, 24, 10]
+    //    }],
+    //    title: {
+    //        text: 'Fiction Books Sales'
+    //    },
+    //    xaxis: {
+    //        categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+    //        labels: {
+    //            hideOverlappingLabels: false,
+    //            trim: false,
+    //            style: {
+    //                colors: [],
+    //                fontSize: '12px',
+    //                fontFamily: 'Helvetica, Arial, sans-serif',
+    //                cssClass: 'apexcharts-xaxis-label',
+    //            },
+    //            formatter: function (val) {
+    //                return val + "K"
+    //            }
+    //        }
+    //    },
+    //    yaxis: {
+    //        title: {
+    //            text: undefined
+    //        },
+
+    //    },
+    //    tooltip: {
+    //        y: {
+    //            formatter: function (val) {
+    //                return val + "K"
+    //            }
+    //        }
+    //    },
+    //    fill: {
+    //        opacity: 1
+
+    //    },
+
+    //    legend: {
+    //        position: 'top',
+    //        horizontalAlign: 'left',
+    //        offsetX: 40
+    //    }
+    //}
+
+    //var chart1 = new ApexCharts(
+    //    document.querySelector("#chart1"),
+    //    options1
+    //);
+
+    //chart1.render();
+    </script>
+}
